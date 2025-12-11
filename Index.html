@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#008080">
+    
+    <!-- PWA Settings -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    
+    <title>Clinic Feedback</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+      :root { --primary: #008080; --primary-dark: #006666; --bg-body: #f4f7f6; --bg-card: #FFFFFF; --text: #333; --border: #e0e0e0; --gold: #FFD700; --gray-star: #e0e0e0; --success: #28a745; }
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; background-color: var(--bg-body); color: var(--text); overflow-x: hidden; min-height: 100vh; }
+      .container { max-width: 600px; margin: 20px auto; background: var(--bg-card); min-height: 90vh; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; position: relative; }
+      .header { background: var(--primary); color: white; padding: 25px 20px; text-align: center; }
+      .header h2 { margin: 0; font-weight: 600; font-size: 22px; }
+      .header p { margin: 5px 0 0; font-size: 13px; opacity: 0.9; font-weight: 300; }
+      .form-body { padding: 25px; transition: opacity 0.3s ease; }
+      .form-group { margin-bottom: 25px; }
+      label { font-weight: 500; font-size: 14px; display: block; margin-bottom: 8px; color: #555; }
+      input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; font-family: inherit; background: #fdfdfd; transition: all 0.3s; }
+      input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1); outline: none; }
+      .uppercase-input { text-transform: uppercase; }
+      .radio-option { display: flex; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; cursor: pointer; background: #fff; transition: background 0.2s; }
+      .radio-option:hover { border-color: #b2dfdb; } .radio-option:active { background-color: #e0f2f1; }
+      .radio-option input { margin-right: 15px; width: 18px; height: 18px; accent-color: var(--primary); }
+      .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .follow-up { display: none; margin-top: 12px; padding: 15px; background: #f0fcfc; border-left: 4px solid var(--primary); border-radius: 4px; animation: slideDown 0.3s ease-out; }
+      .follow-up.show { display: block; } @keyframes slideDown { from {opacity:0; transform:translateY(-10px);} to {opacity:1; transform:translateY(0);} }
+      .stars-wrapper { display: inline-flex; position: relative; height: 45px; align-items: center; }
+      .stars-wrapper input { display: none; }
+      .star-icon { width: 38px; height: 38px; fill: var(--gray-star); margin-right: 2px; transition: transform 0.1s; }
+      .star-icon:active { transform: scale(1.2); }
+      .click-zone { position: absolute; top:0; bottom:0; cursor: pointer; z-index: 10; }
+      .z1 { left:0; width:20px; } .z3 { left:42px; width:20px; } .z5 { left:84px; width:20px; } .z7 { left:126px; width:20px; } .z9 { left:168px; width:20px; }
+      .z2 { left:20px; width:20px; } .z4 { left:62px; width:20px; } .z6 { left:104px; width:20px; } .z8 { left:146px; width:20px; } .z10 { left:188px; width:20px; }
+      .action-area { margin-top: 30px; }
+      .btn-submit { width: 100%; background: var(--primary); color: white; padding: 16px; border: none; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3); transition: background 0.3s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+      .btn-submit:active { transform: scale(0.98); background: var(--primary-dark); } .btn-submit:disabled { background: #999; cursor: not-allowed; box-shadow: none; }
+      #success-view { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.4s ease-in-out; }
+      .success-content { text-align: center; padding: 40px; }
+      .check-circle { width: 80px; height: 80px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--success); font-size: 40px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); } @keyframes popIn { from{transform:scale(0);} to{transform:scale(1);} }
+      .success-title { font-size: 24px; font-weight: 600; margin-bottom: 10px; color: #333; }
+      .success-sub { color: #666; margin-bottom: 30px; }
+      .loader { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; } @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      .hidden-defs { display: none; }
+      /* Sync Badge */
+      #sync-badge { position: absolute; top: 15px; right: 15px; background: #ffa000; color: white; padding: 5px 10px; border-radius: 20px; font-size: 11px; display: none; z-index: 50; }
+    </style>
+  </head>
+  <body>
+    <svg class="hidden-defs">
+      <symbol id="icon-star" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
+      <symbol id="icon-star-half" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="#D3D3D3"/><path d="M12 2l-2.81 6.63L2 9.24l5.46 4.73L5.82 21 12 17.27V2z" /></symbol>
+    </svg>
+    <div class="container">
+      <div id="sync-badge"><i class="fas fa-sync fa-spin"></i> Syncing...</div>
+      
+      <div id="success-view">
+        <div class="success-content">
+          <div class="check-circle"><i class="fas fa-check"></i></div>
+          <div class="success-title">Feedback Saved</div>
+          <div class="success-sub">Thank you for your valuable input.</div>
+          <p style="font-size:12px; color:#999;">Form will refresh automatically...</p>
+        </div>
+      </div>
+      
+      <div id="main-view">
+        <div class="header"><h2>Clinic Feedback</h2><p>We value your input</p></div>
+        <div class="form-body">
+          <form id="feedbackForm" autocomplete="off">
+            <!-- INPUTS -->
+            <div class="form-group"><label>1. Case Number / ID *</label><input type="text" name="caseNumber" id="caseInput" required placeholder="Enter ID" autocomplete="off" class="uppercase-input" oninput="this.value = this.value.toUpperCase()"></div>
+            <div class="form-group"><label>1. Name of Patient *</label><input type="text" name="patientName" required placeholder="Full Name" autocomplete="off"></div>
+            <div class="form-group"><label>2. Date of Visit *</label><input type="date" name="visitDate" id="dateField" required></div>
+            <div class="form-group"><label>3. Disease Department</label><select name="department"><option value="" disabled selected>Select Department</option><option>Cardiology</option><option>Dermatology</option><option>E.N.T</option><option>Endocrinology & Metabolic Disorder</option><option>Gastroenterology</option><option>General / Systemic Disease</option><option>Gynaecology & Obstetrics</option><option>Haematology</option><option>Infectious Diseases</option><option>Male Reproductive System Pathology</option><option>Nephrology</option><option>Neurology</option><option>Oncology</option><option>Ophthalmology</option><option>Oral Pathology</option><option>Ortho and Muscular Disorder</option><option>Psychiatry</option><option>Pulmonology</option><option>Sexual Complain</option><option>Urology</option><option>Vascular Medicine</option><option>Other</option></select></div>
+            <div class="form-group"><label>4. Behaviour of Employees *</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Excellent" required> Excellent</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Good"> Good</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Average"> Average</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Poor"> Poor</label><div id="followBehaviour" class="follow-up"><label>Please let us know what can be improved</label><textarea name="empComments" rows="3"></textarea></div></div>
+            <div class="form-group"><label>5. Was the doctor polite and clear? *</label><label class="radio-option"><input type="radio" name="docPolite" value="Yes" required> Yes</label><label class="radio-option"><input type="radio" name="docPolite" value="No"> No</label><div id="followDoc" class="follow-up"><label>Comments</label><textarea name="docComments" rows="2"></textarea></div></div>
+            <div class="form-group"><label>6. Was booking process easy and smooth? *</label><label class="radio-option"><input type="radio" name="bookingSmooth" value="Yes" required> Yes</label><label class="radio-option"><input type="radio" name="bookingSmooth" value="No"> No</label><div id="followBooking" class="follow-up"><label>Comments</label><textarea name="bookingComments" rows="2"></textarea></div></div>
+            <div class="form-group"><label>7. Was the clinic clean and hygienic? *</label><label class="radio-option"><input type="radio" name="clinicClean" value="Yes" required> Yes</label><label class="radio-option"><input type="radio" name="clinicClean" value="No"> No</label><div id="followClean" class="follow-up"><label>Comments</label><textarea name="cleanComments" rows="2"></textarea></div></div>
+            <div class="form-group"><label>8. How did you come to know about us? *</label><div class="checkbox-grid"><label class="radio-option"><input type="checkbox" name="source" value="Reference"> Reference</label><label class="radio-option"><input type="checkbox" name="source" value="Facebook"> Facebook</label><label class="radio-option"><input type="checkbox" name="source" value="Youtube"> Youtube</label><label class="radio-option"><input type="checkbox" name="source" value="Website"> Website</label></div></div>
+            <div class="form-group"><label>9. Overall rating * <span id="rating-val" style="color:var(--primary); font-weight:bold; margin-left:10px;">0.0</span></label><div class="stars-wrapper"><svg class="star-icon" id="s1"><use href="#icon-star"></use></svg><svg class="star-icon" id="s2"><use href="#icon-star"></use></svg><svg class="star-icon" id="s3"><use href="#icon-star"></use></svg><svg class="star-icon" id="s4"><use href="#icon-star"></use></svg><svg class="star-icon" id="s5"><use href="#icon-star"></use></svg><label class="click-zone z1" for="r0.5"></label><input type="radio" name="rating" id="r0.5" value="0.5"><label class="click-zone z2" for="r1.0"></label><input type="radio" name="rating" id="r1.0" value="1.0"><label class="click-zone z3" for="r1.5"></label><input type="radio" name="rating" id="r1.5" value="1.5"><label class="click-zone z4" for="r2.0"></label><input type="radio" name="rating" id="r2.0" value="2.0"><label class="click-zone z5" for="r2.5"></label><input type="radio" name="rating" id="r2.5" value="2.5"><label class="click-zone z6" for="r3.0"></label><input type="radio" name="rating" id="r3.0" value="3.0"><label class="click-zone z7" for="r3.5"></label><input type="radio" name="rating" id="r3.5" value="3.5"><label class="click-zone z8" for="r4.0"></label><input type="radio" name="rating" id="r4.0" value="4.0"><label class="click-zone z9" for="r4.5"></label><input type="radio" name="rating" id="r4.5" value="4.5"><label class="click-zone z10" for="r5.0"></label><input type="radio" name="rating" id="r5.0" value="5.0"></div></div>
+            <div class="form-group"><label>10. General Suggestion</label><textarea name="suggestion" rows="3"></textarea></div>
+            <div class="form-group"><label style="font-size:13px; color:#666;">11. Feedback taken by *</label><select name="feedbackBy" required><option>RAJA</option></select></div>
+            <div class="action-area"><button type="submit" id="submitBtn" class="btn-submit"><span id="btnText">SUBMIT FEEDBACK</span><div id="btnLoader" class="loader"></div></button></div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      // *** PASTE YOUR GOOGLE SCRIPT URL HERE ***
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSpMwRUEVCBLTuN586dMF1qOJOyQ5e7oNafsVdzguIF-Rsj5s1po9FivKrvigfTRHm/exec"; 
+
+      // --- 1. SERVICE WORKER REGISTRATION (OFFLINE LOADING) ---
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker Registered'))
+            .catch(err => console.log('SW Registration Failed: ', err));
+        });
+      }
+
+      // --- 2. APP LOGIC ---
+      document.getElementById('dateField').valueAsDate = new Date();
+      const starInputs = document.querySelectorAll('input[name="rating"]');
+      const starIcons = [document.getElementById('s1'),document.getElementById('s2'),document.getElementById('s3'),document.getElementById('s4'),document.getElementById('s5')];
+      const ratingVal = document.getElementById('rating-val');
+      
+      starInputs.forEach(input => {
+        input.addEventListener('change', function() {
+          const val = parseFloat(this.value); ratingVal.innerText = val.toFixed(1); updateStars(val);
+        });
+      });
+      function updateStars(val) {
+        starIcons.forEach((icon, index) => {
+          const num = index + 1; icon.style.fill = 'var(--gray-star)'; icon.innerHTML = '<use href="#icon-star"></use>';
+          if (val >= num) icon.style.fill = 'var(--gold)'; else if (val >= num - 0.5) { icon.style.fill = 'var(--gold)'; icon.innerHTML = '<use href="#icon-star-half"></use>'; }
+        });
+      }
+      function setupLogic(name, divId, val, isBeh) {
+        document.getElementsByName(name).forEach(el => {
+          el.addEventListener('change', () => {
+            const div = document.getElementById(divId); let s = false;
+            if(isBeh) { if(el.value==='Average'||el.value==='Poor') s=true; } else { if(el.value===val) s=true; }
+            if(s) div.classList.add('show'); else div.classList.remove('show');
+          });
+        });
+      }
+      setupLogic('empBehaviour','followBehaviour','',true); setupLogic('docPolite','followDoc','No');
+      setupLogic('bookingSmooth','followBooking','No'); setupLogic('clinicClean','followClean','No');
+
+      // --- 3. SUBMIT & SYNC LOGIC ---
+      const form = document.getElementById('feedbackForm');
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const btnLoader = document.getElementById('btnLoader');
+      const mainView = document.getElementById('main-view');
+      const successView = document.getElementById('success-view');
+      const syncBadge = document.getElementById('sync-badge');
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        setLoading(true);
+        const fd = new FormData(form);
+        let obj = {}; fd.forEach((v,k) => { obj[k] = obj[k] ? obj[k] + ", " + v : v; });
+
+        if(navigator.onLine) {
+           sendData(obj);
+        } else {
+           saveOffline(obj);
+        }
+      });
+
+      function sendData(data) {
+        fetch(SCRIPT_URL, {
+          method: 'POST', body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(resData => {
+          if(resData.result === 'success') triggerSuccessAnimation("Feedback Saved");
+          else { alert("Error: " + resData.error); setLoading(false); }
+        })
+        .catch(err => {
+          console.error("Fetch failed, saving offline:", err);
+          saveOffline(data);
+        });
+      }
+
+      function saveOffline(data) {
+        let q = JSON.parse(localStorage.getItem('clinicDB') || "[]");
+        data._savedAt = new Date(); q.push(data); 
+        localStorage.setItem('clinicDB', JSON.stringify(q));
+        triggerSuccessAnimation("Saved to Device (Offline)");
+      }
+
+      function setLoading(isLoading) {
+        if(isLoading) { btn.disabled = true; btnText.innerText = "SAVING..."; btnLoader.style.display = "block"; }
+        else { btn.disabled = false; btnText.innerText = "SUBMIT FEEDBACK"; btnLoader.style.display = "none"; }
+      }
+      function triggerSuccessAnimation(msg) {
+        successView.querySelector('.success-title').innerText = msg;
+        mainView.style.display = 'none'; successView.style.display = 'flex';
+        setTimeout(() => { successView.style.opacity = '1'; }, 10); window.scrollTo(0,0);
+        setTimeout(() => { resetAll(); }, 2500);
+      }
+      function resetAll() {
+        successView.style.opacity = '0';
+        setTimeout(() => {
+          successView.style.display = 'none'; mainView.style.display = 'block';
+          form.reset(); document.getElementById('dateField').valueAsDate = new Date();
+          updateStars(0); ratingVal.innerText = "0.0";
+          document.querySelectorAll('.follow-up').forEach(x => x.classList.remove('show'));
+          setLoading(false); setTimeout(() => { document.getElementById('caseInput').focus(); }, 100);
+          checkSync(); // Check if internet is back to sync
+        }, 400);
+      }
+
+      // --- 4. BACKGROUND SYNC LOOP ---
+      function checkSync() {
+        if(!navigator.onLine) return;
+        let q = JSON.parse(localStorage.getItem('clinicDB') || "[]");
+        if(q.length === 0) { syncBadge.style.display = 'none'; return; }
+
+        // Show Syncing Badge
+        syncBadge.style.display = 'block';
+        
+        // Take the first item
+        const item = q[0];
+        
+        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(item) })
+        .then(r => r.json())
+        .then(d => {
+           if(d.result === 'success') {
+             // Remove from DB and loop again
+             q.shift();
+             localStorage.setItem('clinicDB', JSON.stringify(q));
+             checkSync(); // RECURSIVE CALL
+           }
+        })
+        .catch(e => {
+          console.log("Sync failed, retrying later");
+          syncBadge.style.display = 'none';
+        });
+      }
+
+      window.addEventListener('load', checkSync);
+      window.addEventListener('online', checkSync);
+    </script>
+  </body>
+</html>

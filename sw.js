@@ -1,4 +1,4 @@
-const CACHE_NAME = 'clinic-feedback-v3'; // CHANGED TO v3
+const CACHE_NAME = 'clinic-feedback-v6'; // CHANGED TO v6
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

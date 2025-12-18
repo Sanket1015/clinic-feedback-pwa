@@ -21,6 +21,11 @@
       .container { max-width: 600px; margin: 20px auto; background: var(--bg-card); min-height: 90vh; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; position: relative; }
       .hidden { display: none !important; }
 
+      /* --- UPDATE NOTIFICATION --- */
+      #update-notification { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 20px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; align-items: center; gap: 15px; width: 90%; max-width: 400px; }
+      #update-notification span { flex: 1; font-size: 13px; }
+      #update-reload { background: var(--primary); color: white; border: none; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
       /* --- FORM STYLES --- */
       .header { background: var(--primary); color: white; padding: 25px 20px; text-align: center; position: relative; }
       .header h2 { margin: 0; font-weight: 600; font-size: 22px; }
@@ -29,7 +34,7 @@
       .form-body { padding: 25px; }
       .form-group { margin-bottom: 25px; }
       label { font-weight: 500; font-size: 14px; display: block; margin-bottom: 8px; color: #555; }
-      input[type="text"], input[type="date"], input[type="password"], input[type="number"], select, textarea { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; font-family: inherit; background: #fdfdfd; transition: all 0.3s; }
+      input[type="text"], input[type="tel"], input[type="date"], input[type="password"], input[type="number"], select, textarea { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; font-family: inherit; background: #fdfdfd; transition: all 0.3s; }
       .uppercase-input { text-transform: uppercase; }
       input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1); outline: none; }
       .radio-option { display: flex; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; cursor: pointer; background: #fff; }
@@ -98,12 +103,10 @@
       .range-row { display: flex; align-items: center; gap: 10px; }
       .range-row input { width: 50%; text-align: center; }
       
-      /* New Multi-Select Styles */
       .dept-container { border: 1px solid var(--border); border-radius: 8px; max-height: 150px; overflow-y: auto; padding: 10px; background: #fafafa; }
       .dept-item { display: flex; align-items: center; margin-bottom: 8px; font-size: 14px; }
       .dept-item input { width: 18px; height: 18px; margin-right: 10px; accent-color: var(--primary); }
       
-      /* LOADING OVERLAYS */
       #dashboard-loader { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 50; display: none; align-items: center; justify-content: center; flex-direction: column; }
       #dashboard-loader h4 { color: var(--primary); margin-top: 15px; }
       .big-spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
@@ -114,9 +117,14 @@
   <body>
     <svg style="display:none;"><symbol id="icon-star" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol><symbol id="icon-star-half" viewBox="0 0 24 24"><path d="M22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="#D3D3D3"/><path d="M12 2l-2.81 6.63L2 9.24l5.46 4.73L5.82 21 12 17.27V2z" /></symbol></svg>
 
+    <!-- UPDATE NOTIFICATION -->
+    <div id="update-notification">
+      <span>New version available!</span>
+      <button id="update-reload">REFRESH</button>
+    </div>
+
     <div class="container">
       
-      <!-- LOADING OVERLAY FOR FILTER -->
       <div id="filter-loader">
         <div class="big-spinner" style="border-top-color:white;"></div>
         <p>Loading records...</p>
@@ -130,17 +138,39 @@
           <div class="form-body">
             <form id="feedbackForm" autocomplete="off">
               <div class="form-group"><label>1. Case Number / ID *</label><input type="text" name="caseNumber" id="caseInput" required placeholder="Enter ID" autocomplete="off" class="uppercase-input" oninput="this.value = this.value.toUpperCase()"></div>
-              <div class="form-group"><label>1. Name of Patient *</label><input type="text" name="patientName" required placeholder="Full Name" autocomplete="off"></div>
-              <div class="form-group"><label>2. Date of Visit *</label><input type="date" name="visitDate" id="dateField" required></div>
-              <div class="form-group"><label>3. Disease Department</label><select name="department"><option value="" disabled selected>Select Department</option><option>Cardiology</option><option>Dermatology</option><option>E.N.T</option><option>Endocrinology & Metabolic Disorder</option><option>Gastroenterology</option><option>General / Systemic Disease</option><option>Gynaecology & Obstetrics</option><option>Haematology</option><option>Infectious Diseases</option><option>Male Reproductive System Pathology</option><option>Nephrology</option><option>Neurology</option><option>Oncology</option><option>Ophthalmology</option><option>Oral Pathology</option><option>Ortho and Muscular Disorder</option><option>Psychiatry</option><option>Pulmonology</option><option>Sexual Complain</option><option>Urology</option><option>Vascular Medicine</option><option>Other</option></select></div>
-              <div class="form-group"><label>4. Behaviour of Employees *</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Excellent" required> Excellent</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Good"> Good</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Average"> Average</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Poor"> Poor</label><div id="followBehaviour" class="follow-up"><label>Please let us know what can be improved</label><textarea name="empComments" rows="3"></textarea></div></div>
-              <div class="form-group"><label>5. Was the doctor polite and clear? *</label><label class="radio-option"><input type="radio" name="docPolite" value="Yes" required> Yes</label><label class="radio-option"><input type="radio" name="docPolite" value="No"> No</label><div id="followDoc" class="follow-up"><label>Comments</label><textarea name="docComments" rows="2"></textarea></div></div>
-              <div class="form-group"><label>6. Was booking process easy and smooth? *</label><label class="radio-option"><input type="radio" name="bookingSmooth" value="Yes" required> Yes</label><label class="radio-option"><input type="radio" name="bookingSmooth" value="No"> No</label><div id="followBooking" class="follow-up"><label>Comments</label><textarea name="bookingComments" rows="2"></textarea></div></div>
-              <div class="form-group"><label>7. Was the clinic clean and hygienic? *</label><label class="radio-option"><input type="radio" name="clinicClean" value="Yes" required> Yes</label><label class="radio-option"><input type="radio" name="clinicClean" value="No"> No</label><div id="followClean" class="follow-up"><label>Comments</label><textarea name="cleanComments" rows="2"></textarea></div></div>
-              <div class="form-group"><label>8. How did you come to know about us? *</label><div class="checkbox-grid"><label class="radio-option"><input type="checkbox" name="source" value="Reference"> Reference</label><label class="radio-option"><input type="checkbox" name="source" value="Facebook"> Facebook</label><label class="radio-option"><input type="checkbox" name="source" value="Youtube"> Youtube</label><label class="radio-option"><input type="checkbox" name="source" value="Website"> Website</label></div></div>
-              <div class="form-group"><label>9. Overall rating * <span id="rating-val" style="color:var(--primary); font-weight:bold; margin-left:10px;">0.0</span></label><div class="stars-wrapper"><svg class="star-icon" id="s1"><use href="#icon-star"></use></svg><svg class="star-icon" id="s2"><use href="#icon-star"></use></svg><svg class="star-icon" id="s3"><use href="#icon-star"></use></svg><svg class="star-icon" id="s4"><use href="#icon-star"></use></svg><svg class="star-icon" id="s5"><use href="#icon-star"></use></svg><label class="click-zone z1" for="r0.5"></label><input type="radio" name="rating" id="r0.5" value="0.5"><label class="click-zone z2" for="r1.0"></label><input type="radio" name="rating" id="r1.0" value="1.0"><label class="click-zone z3" for="r1.5"></label><input type="radio" name="rating" id="r1.5" value="1.5"><label class="click-zone z4" for="r2.0"></label><input type="radio" name="rating" id="r2.0" value="2.0"><label class="click-zone z5" for="r2.5"></label><input type="radio" name="rating" id="r2.5" value="2.5"><label class="click-zone z6" for="r3.0"></label><input type="radio" name="rating" id="r3.0" value="3.0"><label class="click-zone z7" for="r3.5"></label><input type="radio" name="rating" id="r3.5" value="3.5"><label class="click-zone z8" for="r4.0"></label><input type="radio" name="rating" id="r4.0" value="4.0"><label class="click-zone z9" for="r4.5"></label><input type="radio" name="rating" id="r4.5" value="4.5"><label class="click-zone z10" for="r5.0"></label><input type="radio" name="rating" id="r5.0" value="5.0"></div></div>
-              <div class="form-group"><label>10. General Suggestion</label><textarea name="suggestion" rows="3"></textarea></div>
-              <div class="form-group"><label style="font-size:13px; color:#666;">11. Feedback taken by *</label><select name="feedbackBy" required><option>RAJA</option></select></div>
+              <div class="form-group"><label>2. Name of Patient *</label><input type="text" name="patientName" required placeholder="Full Name" autocomplete="off"></div>
+              
+              <!-- NEW: Phone Number -->
+              <div class="form-group"><label>3. Phone Number *</label><input type="tel" name="phoneNumber" id="phoneInput" required placeholder="10 Digit Number" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
+
+              <div class="form-group"><label>4. Date of Visit *</label><input type="date" name="visitDate" id="dateField" required></div>
+              <div class="form-group"><label>5. Disease Department</label><select name="department"><option value="" disabled selected>Select Department</option><option>Cardiology</option><option>Dermatology</option><option>E.N.T</option><option>Endocrinology & Metabolic Disorder</option><option>Gastroenterology</option><option>General / Systemic Disease</option><option>Gynaecology & Obstetrics</option><option>Haematology</option><option>Infectious Diseases</option><option>Male Reproductive System Pathology</option><option>Nephrology</option><option>Neurology</option><option>Oncology</option><option>Ophthalmology</option><option>Oral Pathology</option><option>Ortho and Muscular Disorder</option><option>Psychiatry</option><option>Pulmonology</option><option>Sexual Complain</option><option>Urology</option><option>Vascular Medicine</option><option>Other</option></select></div>
+              <div class="form-group"><label>6. Behaviour of Employees *</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Excellent" required> Excellent</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Good"> Good</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Average"> Average</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Poor"> Poor</label><div id="followBehaviour" class="follow-up"><label>Please let us know what can be improved</label><textarea name="empComments" rows="3"></textarea></div></div>
+              <div class="form-group"><label>7. Was the doctor polite and clear? *</label><label class="radio-option"><input type="radio" name="docPolite" value="Yes" required> Yes</label><label class="radio-option"><input type="radio" name="docPolite" value="No"> No</label><div id="followDoc" class="follow-up"><label>Comments</label><textarea name="docComments" rows="2"></textarea></div></div>
+              <div class="form-group"><label>8. Was booking process easy and smooth? *</label><label class="radio-option"><input type="radio" name="bookingSmooth" value="Yes" required> Yes</label><label class="radio-option"><input type="radio" name="bookingSmooth" value="No"> No</label><div id="followBooking" class="follow-up"><label>Comments</label><textarea name="bookingComments" rows="2"></textarea></div></div>
+              <div class="form-group"><label>9. Was the clinic clean and hygienic? *</label><label class="radio-option"><input type="radio" name="clinicClean" value="Yes" required> Yes</label><label class="radio-option"><input type="radio" name="clinicClean" value="No"> No</label><div id="followClean" class="follow-up"><label>Comments</label><textarea name="cleanComments" rows="2"></textarea></div></div>
+              <div class="form-group"><label>10. How did you come to know about us? *</label><div class="checkbox-grid"><label class="radio-option"><input type="checkbox" name="source" value="Reference"> Reference</label><label class="radio-option"><input type="checkbox" name="source" value="Facebook"> Facebook</label><label class="radio-option"><input type="checkbox" name="source" value="Youtube"> Youtube</label><label class="radio-option"><input type="checkbox" name="source" value="Website"> Website</label></div></div>
+              <div class="form-group"><label>11. Overall rating * <span id="rating-val" style="color:var(--primary); font-weight:bold; margin-left:10px;">0.0</span></label><div class="stars-wrapper"><svg class="star-icon" id="s1"><use href="#icon-star"></use></svg><svg class="star-icon" id="s2"><use href="#icon-star"></use></svg><svg class="star-icon" id="s3"><use href="#icon-star"></use></svg><svg class="star-icon" id="s4"><use href="#icon-star"></use></svg><svg class="star-icon" id="s5"><use href="#icon-star"></use></svg><label class="click-zone z1" for="r0.5"></label><input type="radio" name="rating" id="r0.5" value="0.5"><label class="click-zone z2" for="r1.0"></label><input type="radio" name="rating" id="r1.0" value="1.0"><label class="click-zone z3" for="r1.5"></label><input type="radio" name="rating" id="r1.5" value="1.5"><label class="click-zone z4" for="r2.0"></label><input type="radio" name="rating" id="r2.0" value="2.0"><label class="click-zone z5" for="r2.5"></label><input type="radio" name="rating" id="r2.5" value="2.5"><label class="click-zone z6" for="r3.0"></label><input type="radio" name="rating" id="r3.0" value="3.0"><label class="click-zone z7" for="r3.5"></label><input type="radio" name="rating" id="r3.5" value="3.5"><label class="click-zone z8" for="r4.0"></label><input type="radio" name="rating" id="r4.0" value="4.0"><label class="click-zone z9" for="r4.5"></label><input type="radio" name="rating" id="r4.5" value="4.5"><label class="click-zone z10" for="r5.0"></label><input type="radio" name="rating" id="r5.0" value="5.0"></div></div>
+              <div class="form-group"><label>12. General Suggestion</label><textarea name="suggestion" rows="3"></textarea></div>
+              
+              <!-- NEW: Consulting Doctor -->
+              <div class="form-group"><label>13. Consulting Doctor</label>
+                <select name="consultingDoc">
+                  <option value="" disabled selected>Select Doctor</option>
+                  <option>Dr. Biplabi Jaiswal Bose</option>
+                  <option>Dr. Ekata Bhattacharya</option>
+                  <option>Dr. Jogomaya Bose</option>
+                  <option>Dr. Nilanjan Goswami</option>
+                  <option>Dr. Pampa Chakraborty</option>
+                  <option>Dr. Ruma Bhattacharya</option>
+                  <option>Dr. Shanta Jana</option>
+                  <option>Dr. Shibani Shethi</option>
+                  <option>Dr. Shubhendu Chanda</option>
+                  <option>Dr. Sujit Kumar Rana</option>
+                </select>
+              </div>
+
+              <div class="form-group"><label style="font-size:13px; color:#666;">14. Feedback taken by *</label><select name="feedbackBy" required><option>RAJA</option></select></div>
               <div class="action-area"><button type="submit" id="submitBtn" class="btn-submit"><span id="btnText">SUBMIT FEEDBACK</span><div id="btnLoader" class="loader"></div></button></div>
             </form>
           </div>
@@ -164,7 +194,7 @@
 
         <div id="tab-dash" class="tab-content">
           <div class="dash-grid"><div class="kpi-card"><div class="kpi-val" id="kpi-total">0</div><div class="kpi-lbl">Feedback</div></div><div class="kpi-card"><div class="kpi-val" id="kpi-csi">0%</div><div class="kpi-lbl">Satisfaction</div></div></div>
-          <div class="chart-container"><div class="chart-title">Rating Trend</div><canvas id="chartTrend"></canvas></div>
+          <div class="chart-container"><div class="chart-title" id="trend-title">Rating Trend</div><canvas id="chartTrend"></canvas></div>
           <div class="chart-container"><div class="chart-title">Operational Metrics (Yes vs No)</div><canvas id="chartOps"></canvas></div>
           <div class="chart-container"><div class="chart-title">Employee Behaviour</div><canvas id="chartEmp"></canvas></div>
           <div class="chart-container"><div class="chart-title">Marketing Source</div><canvas id="chartSource"></canvas></div>
@@ -200,11 +230,9 @@
         </div>
         <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
         
-        <!-- Multi Select Dept -->
         <div class="form-group">
           <label>Departments (Select multiple)</label>
           <div class="dept-container" id="dept-list-container">
-            <!-- Populated via JS -->
             <div class="dept-item"><input type="checkbox" value="Cardiology"> Cardiology</div>
             <div class="dept-item"><input type="checkbox" value="Dermatology"> Dermatology</div>
             <div class="dept-item"><input type="checkbox" value="E.N.T"> E.N.T</div>
@@ -266,11 +294,41 @@
 
     <script>
       // ================= CONFIGURATION =================
+      // REPLAE THIS URL WITH YOUR NEW DEPLOYMENT URL IF IT CHANGES
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygybhNtcr494gmONIONCYcx9f1og2uOoH29VJI2lIJUCKsYUblIws2O9MPNtmabPaV/exec"; 
 
       // ================= PWA & SYNC LOGIC =================
-      if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); }); }
-      window.addEventListener('load', () => { setTimeout(checkSync, 1000); });
+      let newWorker;
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').then(reg => {
+            reg.addEventListener('updatefound', () => {
+              newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New version found
+                  document.getElementById('update-notification').style.display = 'flex';
+                }
+              });
+            });
+          });
+          setTimeout(checkSync, 1000);
+        });
+      }
+      
+      document.getElementById('update-reload').addEventListener('click', () => {
+        if(newWorker) {
+          newWorker.postMessage({ type: 'SKIP_WAITING' });
+        }
+      });
+      
+      let refreshing;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        window.location.reload();
+        refreshing = true;
+      });
+
       window.addEventListener('online', checkSync);
 
       function checkSync() {
@@ -297,7 +355,18 @@
       setupLogic('empBehaviour','followBehaviour','',true); setupLogic('docPolite','followDoc','No'); setupLogic('bookingSmooth','followBooking','No'); setupLogic('clinicClean','followClean','No');
       
       const form = document.getElementById('feedbackForm');
-      form.addEventListener('submit', e => { e.preventDefault(); setLoading(true); const fd = new FormData(form); let obj = {}; fd.forEach((v,k) => { obj[k] = obj[k] ? obj[k] + ", " + v : v; }); if(navigator.onLine) { sendData(obj); } else { saveOffline(obj); } });
+      form.addEventListener('submit', e => { 
+        e.preventDefault(); 
+        
+        // PHONE VALIDATION
+        const phone = document.getElementById('phoneInput').value;
+        if(phone.length !== 10) { alert("Please enter a valid 10-digit phone number."); return; }
+
+        setLoading(true); 
+        const fd = new FormData(form); let obj = {}; fd.forEach((v,k) => { obj[k] = obj[k] ? obj[k] + ", " + v : v; }); 
+        if(navigator.onLine) { sendData(obj); } else { saveOffline(obj); } 
+      });
+
       function sendData(data) { fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) }).then(res => res.json()).then(resData => { if(resData.result === 'success') triggerSuccessAnimation("Feedback Saved"); else { alert("Error: " + resData.error); setLoading(false); } }).catch(err => { saveOffline(data); }); }
       function saveOffline(data) { let q = JSON.parse(localStorage.getItem('clinicDB') || "[]"); data._savedAt = new Date(); q.push(data); localStorage.setItem('clinicDB', JSON.stringify(q)); triggerSuccessAnimation("Saved to Device (Offline)"); setTimeout(checkSync, 2000); }
       function setLoading(isLoading) { const btn = document.getElementById('submitBtn'); const txt = document.getElementById('btnText'); const ldr = document.getElementById('btnLoader'); if(isLoading) { btn.disabled = true; txt.innerText = "SAVING..."; ldr.style.display = "block"; } else { btn.disabled = false; txt.innerText = "SUBMIT FEEDBACK"; ldr.style.display = "none"; } }
@@ -321,24 +390,16 @@
         window.scrollTo(0,0);
       }
 
-      // Enter Key Support
-      document.getElementById('adminPass').addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') attemptLogin();
-      });
+      document.getElementById('adminPass').addEventListener('keyup', function(e) { if (e.key === 'Enter') attemptLogin(); });
 
       function attemptLogin() {
         const p = document.getElementById('adminPass').value;
         const btn = document.getElementById('btnLogin');
         const msg = document.getElementById('login-msg');
         btn.innerText = "Checking..."; msg.innerText = "";
-        
         fetch(SCRIPT_URL + `?action=login&pass=${p}`).then(r => r.json()).then(d => {
-          if(d.result === 'success') {
-            IS_ADMIN_SESSION = true; 
-            document.getElementById('login-modal').style.display = 'none';
-            document.getElementById('adminPass').value = "";
-            showDashboard();
-          } else { msg.innerText = "Incorrect Password"; }
+          if(d.result === 'success') { IS_ADMIN_SESSION = true; document.getElementById('login-modal').style.display = 'none'; document.getElementById('adminPass').value = ""; showDashboard(); } 
+          else { msg.innerText = "Incorrect Password"; }
           btn.innerText = "ENTER";
         }).catch(e => { msg.innerText = "Network Error"; btn.innerText = "ENTER"; });
       }
@@ -352,26 +413,13 @@
       }
 
       function loadData(startStr, endStr) {
-        // Show Loading Overlay
         document.getElementById('dashboard-loader').style.display = 'flex';
-        
         let url = SCRIPT_URL + `?action=getData`;
-        if(startStr && endStr) {
-          url += `&start=${startStr}&end=${endStr}`;
-          document.getElementById('date-range-lbl').innerText = `${startStr} to ${endStr}`;
-        } else {
-          document.getElementById('date-range-lbl').innerText = "Last 30 Days";
-          const today = new Date(); const past = new Date(); past.setDate(today.getDate()-30);
-          document.getElementById('filter-end').valueAsDate = today;
-          document.getElementById('filter-start').valueAsDate = past;
-        }
+        if(startStr && endStr) { url += `&start=${startStr}&end=${endStr}`; document.getElementById('date-range-lbl').innerText = `${startStr} to ${endStr}`; } 
+        else { document.getElementById('date-range-lbl').innerText = "Last 30 Days"; const today = new Date(); const past = new Date(); past.setDate(today.getDate()-30); document.getElementById('filter-end').valueAsDate = today; document.getElementById('filter-start').valueAsDate = past; }
 
         fetch(url).then(r=>r.json()).then(d => {
-          if(d.result === 'success') {
-            RAW_DATA = d.data;
-            processData(RAW_DATA);
-          } else { alert("Error loading data"); }
-          // Hide Loader
+          if(d.result === 'success') { RAW_DATA = d.data; processData(RAW_DATA); } else { alert("Error loading data"); }
           document.getElementById('dashboard-loader').style.display = 'none';
         });
       }
@@ -380,6 +428,7 @@
         document.getElementById('kpi-total').innerText = data.length;
         const avg = data.reduce((acc, r) => acc + (parseFloat(r['Rating'])||0), 0) / (data.length||1);
         document.getElementById('kpi-csi').innerText = Math.round((avg/5)*100) + "%";
+        document.getElementById('trend-title').innerText = "Rating Trend (Avg: " + avg.toFixed(1) + ")";
         renderCharts(data);
         renderList(data);
       }
@@ -397,6 +446,8 @@
             <div class="rc-header"><span class="rc-id">${r['Case Number']}</span><span class="rc-date">${dateTxt}</span></div>
             <div class="rc-row"><span class="rc-name">${r['Patient Name']}</span><span class="rc-rating">${r['Rating']} ★</span></div>
             <div class="rc-details">
+              <div><span class="rc-label">Phone:</span> <span>${r['Phone Number'] || '-'}</span></div>
+              <div><span class="rc-label">Doctor:</span> <span>${r['Consulting Doctor'] || '-'}</span></div>
               <div><span class="rc-label">Dept:</span> <span>${r['Department']}</span></div>
               <div><span class="rc-label">Emp Behav:</span> <span>${r['Emp Behaviour']}</span></div>
               <div><span class="rc-label">Doc Polite:</span> <span>${r['Doctor Polite']}</span></div>
@@ -410,12 +461,11 @@
         });
       }
 
-      // --- NEW MULTI-FILTER LOGIC ---
+      // --- FILTER LOGIC ---
       function openFilter() { document.getElementById('drawer-overlay').style.display = 'block'; setTimeout(()=>document.getElementById('filter-drawer').classList.add('open'), 10); }
       function closeFilter() { document.getElementById('filter-drawer').classList.remove('open'); setTimeout(()=>document.getElementById('drawer-overlay').style.display = 'none', 300); }
       
       function resetFilters() {
-         // Reset UI elements
          document.getElementById('filter-emp').value = "All";
          document.getElementById('filter-doc').value = "All";
          document.getElementById('filter-book').value = "All";
@@ -423,51 +473,31 @@
          document.getElementById('filter-source').value = "All";
          document.getElementById('filter-rate-min').value = "0";
          document.getElementById('filter-rate-max').value = "5";
-         
-         // Uncheck all depts
-         const checkboxes = document.querySelectorAll('#dept-list-container input[type="checkbox"]');
-         checkboxes.forEach(cb => cb.checked = false);
-
-         // Reset Dates to Last 30 Days default
+         document.querySelectorAll('#dept-list-container input[type="checkbox"]').forEach(cb => cb.checked = false);
          const today = new Date(); const past = new Date(); past.setDate(today.getDate()-30);
          document.getElementById('filter-end').valueAsDate = today;
          document.getElementById('filter-start').valueAsDate = past;
-
-         // Reload Default Data
-         loadData(); 
-         closeFilter();
+         loadData(); closeFilter();
       }
 
       function applyFilter() {
         const start = document.getElementById('filter-start').value;
         const end = document.getElementById('filter-end').value;
-        
-        // Show Filter Loader
         document.getElementById('filter-loader').style.display = 'flex';
-
-        // Check if server reload needed
         if(start && end) {
            let url = SCRIPT_URL + `?action=getData&start=${start}&end=${end}`;
            document.getElementById('date-range-lbl').innerText = `${start} to ${end}`;
            fetch(url).then(r=>r.json()).then(d => {
-             if(d.result==='success') {
-               RAW_DATA = d.data;
-               runLocalFilters();
-             }
+             if(d.result==='success') { RAW_DATA = d.data; runLocalFilters(); }
              document.getElementById('filter-loader').style.display = 'none';
            });
-        } else {
-           runLocalFilters();
-           document.getElementById('filter-loader').style.display = 'none';
-        }
+        } else { runLocalFilters(); document.getElementById('filter-loader').style.display = 'none'; }
         closeFilter();
       }
 
       function runLocalFilters() {
-        // Get Checked Depts
         const checkboxes = document.querySelectorAll('#dept-list-container input[type="checkbox"]:checked');
         const selectedDepts = Array.from(checkboxes).map(cb => cb.value);
-
         const f_emp = document.getElementById('filter-emp').value;
         const f_doc = document.getElementById('filter-doc').value;
         const f_book = document.getElementById('filter-book').value;
@@ -507,7 +537,14 @@
       function renderCharts(data) {
         ['chartTrend','chartOps','chartEmp','chartSource'].forEach(id => { if(chartInstances[id]) chartInstances[id].destroy(); });
         const dates = {};
-        data.forEach(r => { let d = r['Visit Date'] ? r['Visit Date'].substring(0,10) : 'Unknown'; if(!dates[d]) dates[d] = []; dates[d].push(parseFloat(r['Rating'])||0); });
+        
+        // FIXED DATE LOGIC using Local Date String to avoid timezone issues
+        data.forEach(r => { 
+          let d = 'Unknown';
+          if(r['Visit Date']) d = new Date(r['Visit Date']).toLocaleDateString('en-CA'); // YYYY-MM-DD format
+          if(!dates[d]) dates[d] = []; dates[d].push(parseFloat(r['Rating'])||0); 
+        });
+
         const lbls = Object.keys(dates).sort();
         const avgs = lbls.map(d => dates[d].reduce((a,b)=>a+b,0)/dates[d].length);
         chartInstances['chartTrend'] = new Chart(document.getElementById('chartTrend'), { type: 'line', data: { labels: lbls, datasets: [{ label: 'Avg Rating', data: avgs, borderColor: '#008080', tension: 0.3 }] } });

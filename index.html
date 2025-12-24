@@ -28,7 +28,10 @@
       #update-reload { background: var(--primary); color: white; border: none; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; }
 
       /* --- QR MODAL --- */
-      #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
+      #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; opacity: 0; transition: opacity 0.3s ease; }
+      #qr-modal.visible { opacity: 1; }
+      .qr-content { transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+      #qr-modal.visible .qr-content { transform: scale(1); }
       #qr-canvas { background: white; padding: 10px; border-radius: 12px; margin: 20px 0; }
       .qr-btn { background: white; color: #333; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; cursor: pointer; margin-top: 20px; }
 
@@ -57,15 +60,9 @@
       .btn-submit:disabled { background: #999; }
       .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); margin-top: 10px; }
 
-      /* --- SUCCESS & SYNC --- */
-      #success-view { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.4s; }
-      .check-circle { width: 80px; height: 80px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: var(--success); font-size: 40px; }
-      #sync-badge { position: absolute; top: 15px; right: 60px; background: #ffa000; color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; display: none; z-index: 45; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-      .loader { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; }
-      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
       /* --- ADMIN PANEL STYLES --- */
       #admin-app { display: none; background: #f8f9fa; min-height: 100vh; padding-bottom: 60px; position: relative; }
+      
       .admin-header { background: #333; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
       .admin-header h3 { margin: 0; font-size: 16px; }
       .close-admin { cursor: pointer; font-size: 20px; }
@@ -99,19 +96,20 @@
       .rc-details { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; font-size: 13px; color: #444; }
       .rc-details div { margin-bottom: 4px; display: flex; justify-content: space-between; }
       .rc-label { font-weight: 500; color: #000; margin-right: 10px; }
-      
       .rc-comment-box { margin-top: 8px; background: #f9f9f9; padding: 8px; border-radius: 4px; border-left: 3px solid var(--primary); font-size: 12px; color: #555; }
       .rc-comment-lbl { font-weight: 600; font-size: 11px; color: var(--primary); text-transform: uppercase; display: block; margin-bottom: 2px; }
 
+      /* FLOATING FILTER BUTTON (Records Only) */
+      .fab-filter { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 20px; cursor: pointer; z-index: 100; transition: transform 0.2s; }
+      .fab-filter:active { transform: scale(0.9); }
+      
       /* FILTER DRAWER STYLES */
       #filter-drawer { position: fixed; top: 0; right: -100%; width: 90%; height: 100%; background: white; z-index: 150; transition: right 0.3s; padding: 20px; box-shadow: -5px 0 15px rgba(0,0,0,0.1); overflow-y: auto; display:flex; flex-direction:column; }
       #filter-drawer.open { right: 0; }
       .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
       .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); z-index: 140; display: none; }
-      .fab-filter { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 20px; cursor: pointer; z-index: 100; }
       .range-row { display: flex; align-items: center; gap: 10px; }
       .range-row input { width: 50%; text-align: center; }
-      
       .dept-container { border: 1px solid var(--border); border-radius: 8px; max-height: 150px; overflow-y: auto; padding: 10px; background: #fafafa; }
       .dept-item { display: flex; align-items: center; margin-bottom: 8px; font-size: 14px; }
       .dept-item input { width: 18px; height: 18px; margin-right: 10px; accent-color: var(--primary); }
@@ -119,7 +117,6 @@
       #dashboard-loader { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 50; display: none; align-items: center; justify-content: center; flex-direction: column; }
       #dashboard-loader h4 { color: var(--primary); margin-top: 15px; }
       .big-spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-      
       #filter-loader { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; color: white; flex-direction: column; }
     </style>
   </head>
@@ -134,11 +131,13 @@
 
     <!-- QR MODAL -->
     <div id="qr-modal">
-      <h3 style="margin-bottom:5px;">Thank You!</h3>
-      <p style="margin-top:0; opacity:0.8;">Glad you liked our service.</p>
-      <p style="font-size:14px;">Please scan to rate us on Google:</p>
-      <canvas id="qr-canvas"></canvas>
-      <button class="qr-btn" onclick="closeQr()">Done</button>
+      <div class="qr-content" style="background:white; padding:30px; border-radius:15px; width:85%; max-width:320px; display:flex; flex-direction:column; align-items:center;">
+        <h3 style="margin:0 0 5px 0; color:#333;">Thank You!</h3>
+        <p style="margin:0; opacity:0.6; font-size:13px; color:#555;">Glad you liked our service.</p>
+        <p style="font-size:14px; font-weight:600; color:#000; margin-top:15px;">Please scan to rate us on Google:</p>
+        <canvas id="qr-canvas"></canvas>
+        <button class="qr-btn" onclick="closeQr()" style="background:var(--primary); color:white; margin-top:15px; width:100%;">Done</button>
+      </div>
     </div>
 
     <div class="container">
@@ -157,44 +156,17 @@
             <form id="feedbackForm" autocomplete="off">
               <div class="form-group"><label>1. Case Number / ID *</label><input type="text" name="caseNumber" id="caseInput" required placeholder="Enter ID" autocomplete="off" class="uppercase-input" oninput="this.value = this.value.toUpperCase()"></div>
               <div class="form-group"><label>2. Name of Patient *</label><input type="text" name="patientName" required placeholder="Full Name" autocomplete="off"></div>
-              
               <div class="form-group"><label>3. Phone Number *</label><input type="tel" name="phoneNumber" id="phoneInput" required placeholder="10 Digit Number" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
-
               <div class="form-group"><label>4. Date of Visit *</label><input type="date" name="visitDate" id="dateField" required></div>
               <div class="form-group"><label>5. Disease Department</label><select name="department"><option value="" disabled selected>Select Department</option><option>Cardiology</option><option>Dermatology</option><option>E.N.T</option><option>Endocrinology & Metabolic Disorder</option><option>Gastroenterology</option><option>General / Systemic Disease</option><option>Gynaecology & Obstetrics</option><option>Haematology</option><option>Infectious Diseases</option><option>Male Reproductive System Pathology</option><option>Nephrology</option><option>Neurology</option><option>Oncology</option><option>Ophthalmology</option><option>Oral Pathology</option><option>Ortho and Muscular Disorder</option><option>Psychiatry</option><option>Pulmonology</option><option>Sexual Complain</option><option>Urology</option><option>Vascular Medicine</option><option>Other</option></select></div>
-              
               <div class="form-group"><label>6. Behaviour of Support staff *</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Excellent" required> Excellent</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Good"> Good</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Average"> Average</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Poor"> Poor</label><div id="followBehaviour" class="follow-up"><label>Please let us know what can be improved</label><textarea name="empComments" rows="3"></textarea></div></div>
-              
-              <div class="form-group"><label>7. How was the doctor’s consultation and explanation? *</label>
-                <label class="radio-option"><input type="radio" name="docPolite" value="Excellent" required> Excellent</label>
-                <label class="radio-option"><input type="radio" name="docPolite" value="Good"> Good</label>
-                <label class="radio-option"><input type="radio" name="docPolite" value="Average"> Average</label>
-                <label class="radio-option"><input type="radio" name="docPolite" value="Poor"> Poor</label>
-                <div id="followDoc" class="follow-up"><label>Comments</label><textarea name="docComments" rows="2"></textarea></div>
-              </div>
-
+              <div class="form-group"><label>7. How was the doctor’s consultation and explanation? *</label><label class="radio-option"><input type="radio" name="docPolite" value="Excellent" required> Excellent</label><label class="radio-option"><input type="radio" name="docPolite" value="Good"> Good</label><label class="radio-option"><input type="radio" name="docPolite" value="Average"> Average</label><label class="radio-option"><input type="radio" name="docPolite" value="Poor"> Poor</label><div id="followDoc" class="follow-up"><label>Comments</label><textarea name="docComments" rows="2"></textarea></div></div>
               <div class="form-group"><label>8. Was booking process easy and smooth? *</label><label class="radio-option"><input type="radio" name="bookingSmooth" value="Yes" required> Yes</label><label class="radio-option"><input type="radio" name="bookingSmooth" value="No"> No</label><div id="followBooking" class="follow-up"><label>Comments</label><textarea name="bookingComments" rows="2"></textarea></div></div>
               <div class="form-group"><label>9. Was the clinic clean and hygienic? *</label><label class="radio-option"><input type="radio" name="clinicClean" value="Yes" required> Yes</label><label class="radio-option"><input type="radio" name="clinicClean" value="No"> No</label><div id="followClean" class="follow-up"><label>Comments</label><textarea name="cleanComments" rows="2"></textarea></div></div>
               <div class="form-group"><label>10. How did you come to know about us? *</label><div class="checkbox-grid"><label class="radio-option"><input type="checkbox" name="source" value="Reference"> Reference</label><label class="radio-option"><input type="checkbox" name="source" value="Facebook"> Facebook</label><label class="radio-option"><input type="checkbox" name="source" value="Youtube"> Youtube</label><label class="radio-option"><input type="checkbox" name="source" value="Website"> Website</label></div></div>
               <div class="form-group"><label>11. Overall rating * <span id="rating-val" style="color:var(--primary); font-weight:bold; margin-left:10px;">0.0</span></label><div class="stars-wrapper"><svg class="star-icon" id="s1"><use href="#icon-star"></use></svg><svg class="star-icon" id="s2"><use href="#icon-star"></use></svg><svg class="star-icon" id="s3"><use href="#icon-star"></use></svg><svg class="star-icon" id="s4"><use href="#icon-star"></use></svg><svg class="star-icon" id="s5"><use href="#icon-star"></use></svg><label class="click-zone z1" for="r0.5"></label><input type="radio" name="rating" id="r0.5" value="0.5"><label class="click-zone z2" for="r1.0"></label><input type="radio" name="rating" id="r1.0" value="1.0"><label class="click-zone z3" for="r1.5"></label><input type="radio" name="rating" id="r1.5" value="1.5"><label class="click-zone z4" for="r2.0"></label><input type="radio" name="rating" id="r2.0" value="2.0"><label class="click-zone z5" for="r2.5"></label><input type="radio" name="rating" id="r2.5" value="2.5"><label class="click-zone z6" for="r3.0"></label><input type="radio" name="rating" id="r3.0" value="3.0"><label class="click-zone z7" for="r3.5"></label><input type="radio" name="rating" id="r3.5" value="3.5"><label class="click-zone z8" for="r4.0"></label><input type="radio" name="rating" id="r4.0" value="4.0"><label class="click-zone z9" for="r4.5"></label><input type="radio" name="rating" id="r4.5" value="4.5"><label class="click-zone z10" for="r5.0"></label><input type="radio" name="rating" id="r5.0" value="5.0"></div></div>
               <div class="form-group"><label>12. General Suggestion</label><textarea name="suggestion" rows="3"></textarea></div>
-              
-              <div class="form-group"><label>13. Consulting Doctor</label>
-                <select name="consultingDoc">
-                  <option value="" disabled selected>Select Doctor</option>
-                  <option>Dr. Biplabi Jaiswal Bose</option>
-                  <option>Dr. Ekata Bhattacharya</option>
-                  <option>Dr. Jogomaya Bose</option>
-                  <option>Dr. Nilanjan Goswami</option>
-                  <option>Dr. Pampa Chakraborty</option>
-                  <option>Dr. Ruma Bhattacharya</option>
-                  <option>Dr. Shanta Jana</option>
-                  <option>Dr. Shibani Shethi</option>
-                  <option>Dr. Shubhendu Chanda</option>
-                  <option>Dr. Sujit Kumar Rana</option>
-                </select>
-              </div>
-
+              <div class="form-group"><label>13. Consulting Doctor</label><select name="consultingDoc"><option value="" disabled selected>Select Doctor</option><option>Dr. Biplabi Jaiswal Bose</option><option>Dr. Ekata Bhattacharya</option><option>Dr. Jogomaya Bose</option><option>Dr. Nilanjan Goswami</option><option>Dr. Pampa Chakraborty</option><option>Dr. Ruma Bhattacharya</option><option>Dr. Shanta Jana</option><option>Dr. Shibani Shethi</option><option>Dr. Shubhendu Chanda</option><option>Dr. Sujit Kumar Rana</option></select></div>
               <div class="form-group"><label style="font-size:13px; color:#666;">14. Feedback taken by *</label><select name="feedbackBy" required><option>RAJA</option></select></div>
               <div class="action-area"><button type="submit" id="submitBtn" class="btn-submit"><span id="btnText">SUBMIT FEEDBACK</span><div id="btnLoader" class="loader"></div></button></div>
             </form>
@@ -204,12 +176,13 @@
 
       <!-- ================= ADMIN DASHBOARD ================= -->
       <div id="admin-app">
-        <div id="dashboard-loader">
-          <div class="big-spinner"></div>
-          <h4>Loading Data...</h4>
+        <div id="dashboard-loader"><div class="big-spinner"></div><h4>Loading Data...</h4></div>
+        
+        <div class="admin-header">
+          <h3>Admin Dashboard</h3>
+          <i class="fas fa-times close-admin" onclick="closeAdmin()"></i>
         </div>
 
-        <div class="admin-header"><h3>Admin Dashboard</h3><i class="fas fa-times close-admin" onclick="closeAdmin()"></i></div>
         <div id="date-status" class="date-banner">📅 <span id="date-range-lbl">Last 30 Days</span> <u onclick="openFilter()">Change</u></div>
         <div class="nav-tabs">
           <div class="nav-tab active" onclick="switchTab('dash')">Overview</div>
@@ -220,16 +193,18 @@
         <div id="tab-dash" class="tab-content">
           <div class="dash-grid"><div class="kpi-card"><div class="kpi-val" id="kpi-total">0</div><div class="kpi-lbl">Feedback</div></div><div class="kpi-card"><div class="kpi-val" id="kpi-csi">0%</div><div class="kpi-lbl">Satisfaction</div></div></div>
           <div class="chart-container"><div class="chart-title" id="trend-title">Rating Trend</div><canvas id="chartTrend"></canvas></div>
-          <div class="chart-container"><div class="chart-title">Operational Metrics (Yes vs No)</div><canvas id="chartOps"></canvas></div>
           <div class="chart-container"><div class="chart-title">Staff & Doctor Ratings</div><canvas id="chartEmp"></canvas></div>
+          <div class="chart-container"><div class="chart-title">Operational Metrics (Yes vs No)</div><canvas id="chartOps"></canvas></div>
           <div class="chart-container"><div class="chart-title">Marketing Source</div><canvas id="chartSource"></canvas></div>
         </div>
 
         <div id="tab-records" class="tab-content hidden">
           <div id="records-container" class="records-list"></div>
           <div style="text-align:center; padding:20px; color:#999; font-size:12px;">End of loaded records.<br>Use "Change" above to search older dates.</div>
-          <div class="fab-filter" onclick="openFilter()"><i class="fas fa-filter"></i></div>
         </div>
+
+        <!-- FILTER BUTTON (RECORDS ONLY) -->
+        <div class="fab-filter" id="records-filter-btn" onclick="openFilter()"><i class="fas fa-filter"></i></div>
 
         <div id="tab-settings" class="tab-content hidden" style="padding:20px;">
           <h4 style="margin-top:0;">Security</h4>
@@ -244,373 +219,93 @@
       <div class="overlay" id="drawer-overlay" onclick="closeFilter()"></div>
       <div id="filter-drawer">
         <div class="drawer-header"><h3>Filter Data</h3><i class="fas fa-times" onclick="closeFilter()"></i></div>
-        
-        <div class="form-group">
-          <label>Date Range (Server Load)</label>
-          <div style="display:flex; gap:10px;">
-            <input type="date" id="filter-start">
-            <input type="date" id="filter-end">
-          </div>
-          <small style="color:var(--primary); display:block; margin-top:5px;">To see older data, change dates and Apply.</small>
-        </div>
+        <div class="form-group"><label>Date Range (Server Load)</label><div style="display:flex; gap:10px;"><input type="date" id="filter-start"><input type="date" id="filter-end"></div><small style="color:var(--primary); display:block; margin-top:5px;">To see older data, change dates and Apply.</small></div>
         <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
         
-        <div class="form-group">
-          <label>Departments</label>
-          <div class="dept-container" id="dept-list-container">
-            <div class="dept-item"><input type="checkbox" value="Cardiology"> Cardiology</div>
-            <div class="dept-item"><input type="checkbox" value="Dermatology"> Dermatology</div>
-            <div class="dept-item"><input type="checkbox" value="E.N.T"> E.N.T</div>
-            <div class="dept-item"><input type="checkbox" value="Endocrinology & Metabolic Disorder"> Endocrinology</div>
-            <div class="dept-item"><input type="checkbox" value="Gastroenterology"> Gastroenterology</div>
-            <div class="dept-item"><input type="checkbox" value="General / Systemic Disease"> General / Systemic</div>
-            <div class="dept-item"><input type="checkbox" value="Gynaecology & Obstetrics"> Gynaecology</div>
-            <div class="dept-item"><input type="checkbox" value="Haematology"> Haematology</div>
-            <div class="dept-item"><input type="checkbox" value="Infectious Diseases"> Infectious Diseases</div>
-            <div class="dept-item"><input type="checkbox" value="Male Reproductive System Pathology"> Male Reproductive</div>
-            <div class="dept-item"><input type="checkbox" value="Nephrology"> Nephrology</div>
-            <div class="dept-item"><input type="checkbox" value="Neurology"> Neurology</div>
-            <div class="dept-item"><input type="checkbox" value="Oncology"> Oncology</div>
-            <div class="dept-item"><input type="checkbox" value="Ophthalmology"> Ophthalmology</div>
-            <div class="dept-item"><input type="checkbox" value="Oral Pathology"> Oral Pathology</div>
-            <div class="dept-item"><input type="checkbox" value="Ortho and Muscular Disorder"> Ortho</div>
-            <div class="dept-item"><input type="checkbox" value="Psychiatry"> Psychiatry</div>
-            <div class="dept-item"><input type="checkbox" value="Pulmonology"> Pulmonology</div>
-            <div class="dept-item"><input type="checkbox" value="Sexual Complain"> Sexual Complain</div>
-            <div class="dept-item"><input type="checkbox" value="Urology"> Urology</div>
-            <div class="dept-item"><input type="checkbox" value="Vascular Medicine"> Vascular Medicine</div>
-            <div class="dept-item"><input type="checkbox" value="Other"> Other</div>
-          </div>
-        </div>
-
-        <!-- NEW: Employee Multi-Select -->
-        <div class="form-group">
-          <label>Employee Behaviour</label>
-          <div class="dept-container" id="emp-list-container">
-            <div class="dept-item"><input type="checkbox" value="Excellent"> Excellent</div>
-            <div class="dept-item"><input type="checkbox" value="Good"> Good</div>
-            <div class="dept-item"><input type="checkbox" value="Average"> Average</div>
-            <div class="dept-item"><input type="checkbox" value="Poor"> Poor</div>
-          </div>
-        </div>
-
-        <!-- NEW: Doctor Multi-Select -->
-        <div class="form-group">
-          <label>Doctor Consultation</label>
-          <div class="dept-container" id="doc-list-container">
-            <div class="dept-item"><input type="checkbox" value="Excellent"> Excellent</div>
-            <div class="dept-item"><input type="checkbox" value="Good"> Good</div>
-            <div class="dept-item"><input type="checkbox" value="Average"> Average</div>
-            <div class="dept-item"><input type="checkbox" value="Poor"> Poor</div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Rating Range (0 - 5)</label>
-          <div class="range-row">
-            <input type="number" id="filter-rate-min" value="0" min="0" max="5" step="0.5">
-            <span>to</span>
-            <input type="number" id="filter-rate-max" value="5" min="0" max="5" step="0.5">
-          </div>
-        </div>
-
+        <div class="form-group"><label>Departments</label><div class="dept-container" id="dept-list-container"><div class="dept-item"><input type="checkbox" value="Cardiology"> Cardiology</div><div class="dept-item"><input type="checkbox" value="Dermatology"> Dermatology</div><div class="dept-item"><input type="checkbox" value="E.N.T"> E.N.T</div><div class="dept-item"><input type="checkbox" value="Endocrinology & Metabolic Disorder"> Endocrinology</div><div class="dept-item"><input type="checkbox" value="Gastroenterology"> Gastroenterology</div><div class="dept-item"><input type="checkbox" value="General / Systemic Disease"> General / Systemic</div><div class="dept-item"><input type="checkbox" value="Gynaecology & Obstetrics"> Gynaecology</div><div class="dept-item"><input type="checkbox" value="Haematology"> Haematology</div><div class="dept-item"><input type="checkbox" value="Infectious Diseases"> Infectious Diseases</div><div class="dept-item"><input type="checkbox" value="Male Reproductive System Pathology"> Male Reproductive</div><div class="dept-item"><input type="checkbox" value="Nephrology"> Nephrology</div><div class="dept-item"><input type="checkbox" value="Neurology"> Neurology</div><div class="dept-item"><input type="checkbox" value="Oncology"> Oncology</div><div class="dept-item"><input type="checkbox" value="Ophthalmology"> Ophthalmology</div><div class="dept-item"><input type="checkbox" value="Oral Pathology"> Oral Pathology</div><div class="dept-item"><input type="checkbox" value="Ortho and Muscular Disorder"> Ortho</div><div class="dept-item"><input type="checkbox" value="Psychiatry"> Psychiatry</div><div class="dept-item"><input type="checkbox" value="Pulmonology"> Pulmonology</div><div class="dept-item"><input type="checkbox" value="Sexual Complain"> Sexual Complain</div><div class="dept-item"><input type="checkbox" value="Urology"> Urology</div><div class="dept-item"><input type="checkbox" value="Vascular Medicine"> Vascular Medicine</div><div class="dept-item"><input type="checkbox" value="Other"> Other</div></div></div>
+        <div class="form-group"><label>Employee Behaviour</label><div class="dept-container" id="emp-list-container"><div class="dept-item"><input type="checkbox" value="Excellent"> Excellent</div><div class="dept-item"><input type="checkbox" value="Good"> Good</div><div class="dept-item"><input type="checkbox" value="Average"> Average</div><div class="dept-item"><input type="checkbox" value="Poor"> Poor</div></div></div>
+        <div class="form-group"><label>Doctor Consultation</label><div class="dept-container" id="doc-list-container"><div class="dept-item"><input type="checkbox" value="Excellent"> Excellent</div><div class="dept-item"><input type="checkbox" value="Good"> Good</div><div class="dept-item"><input type="checkbox" value="Average"> Average</div><div class="dept-item"><input type="checkbox" value="Poor"> Poor</div></div></div>
+        <div class="form-group"><label>Rating Range</label><div class="range-row"><input type="number" id="filter-rate-min" value="0" min="0" max="5" step="0.5"><span>to</span><input type="number" id="filter-rate-max" value="5" min="0" max="5" step="0.5"></div></div>
         <div class="form-group"><label>Booking Smooth</label><select id="filter-book"><option value="All">All</option><option>Yes</option><option>No</option></select></div>
         <div class="form-group"><label>Clinic Clean</label><select id="filter-clean"><option value="All">All</option><option>Yes</option><option>No</option></select></div>
         <div class="form-group"><label>Source</label><select id="filter-source"><option value="All">All</option><option>Reference</option><option>Facebook</option><option>Youtube</option><option>Website</option></select></div>
-
-        <div style="margin-top:auto; padding-top:20px;">
-          <button class="btn-submit" onclick="applyFilter()">Apply Filters</button>
-          <button class="btn-submit btn-outline" onclick="resetFilters()">Clear Filters</button>
-        </div>
+        <div style="margin-top:auto; padding-top:20px;"><button class="btn-submit" onclick="applyFilter()">Apply Filters</button><button class="btn-submit btn-outline" onclick="resetFilters()">Clear Filters</button></div>
       </div>
 
       <!-- LOGIN MODAL -->
-      <div id="login-modal">
-        <div class="login-box">
-          <h3>Admin Login</h3>
-          <div class="form-group"><input type="password" id="adminPass" placeholder="Enter Password" style="text-align:center; letter-spacing:5px;"></div>
-          <button class="btn-submit" id="btnLogin" onclick="attemptLogin()">ENTER</button>
-          <div id="login-msg" style="color:red; font-size:12px; margin-top:10px;"></div>
-          <button style="margin-top:15px; background:none; border:none; color:#999; text-decoration:underline;" onclick="closeAdmin()">Cancel</button>
-        </div>
-      </div>
-
+      <div id="login-modal"><div class="login-box"><h3>Admin Login</h3><div class="form-group"><input type="password" id="adminPass" placeholder="Enter Password" style="text-align:center; letter-spacing:5px;"></div><button class="btn-submit" id="btnLogin" onclick="attemptLogin()">ENTER</button><div id="login-msg" style="color:red; font-size:12px; margin-top:10px;"></div><button style="margin-top:15px; background:none; border:none; color:#999; text-decoration:underline;" onclick="closeAdmin()">Cancel</button></div></div>
     </div>
 
     <script>
-      // ================= CONFIGURATION =================
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygybhNtcr494gmONIONCYcx9f1og2uOoH29VJI2lIJUCKsYUblIws2O9MPNtmabPaV/exec"; 
       const GOOGLE_REVIEW_LINK = "https://g.page/r/CUexQ0smZF95EAE/review";
 
-      // ================= PWA & SYNC LOGIC =================
+      // PWA Logic
       let newWorker;
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').then(reg => {
-            reg.addEventListener('updatefound', () => {
-              newWorker = reg.installing;
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  document.getElementById('update-notification').style.display = 'flex';
-                }
-              });
-            });
-          });
-          setTimeout(checkSync, 1000);
-        });
-      }
-      
-      document.getElementById('update-reload').addEventListener('click', () => {
-        if(newWorker) newWorker.postMessage({ type: 'SKIP_WAITING' });
-      });
-      
-      let refreshing;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (refreshing) return;
-        window.location.reload();
-        refreshing = true;
-      });
-
+      if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(reg => { reg.addEventListener('updatefound', () => { newWorker = reg.installing; newWorker.addEventListener('statechange', () => { if (newWorker.state === 'installed' && navigator.serviceWorker.controller) document.getElementById('update-notification').style.display = 'flex'; }); }); }); setTimeout(checkSync, 1000); }); }
+      document.getElementById('update-reload').addEventListener('click', () => { if(newWorker) newWorker.postMessage({ type: 'SKIP_WAITING' }); });
+      let refreshing; navigator.serviceWorker.addEventListener('controllerchange', () => { if (refreshing) return; window.location.reload(); refreshing = true; });
       window.addEventListener('online', checkSync);
+      function checkSync() { if(!navigator.onLine) return; let q = JSON.parse(localStorage.getItem('clinicDB') || "[]"); if(q.length === 0) { document.getElementById('sync-badge').style.display = 'none'; return; } document.getElementById('sync-badge').style.display = 'block'; const item = q[0]; fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(item) }).then(r => r.json()).then(d => { if(d.result === 'success') { q.shift(); localStorage.setItem('clinicDB', JSON.stringify(q)); checkSync(); } else document.getElementById('sync-badge').style.display = 'none'; }).catch(e => document.getElementById('sync-badge').style.display = 'none'); }
 
-      function checkSync() {
-        if(!navigator.onLine) return;
-        let q = JSON.parse(localStorage.getItem('clinicDB') || "[]");
-        if(q.length === 0) { document.getElementById('sync-badge').style.display = 'none'; return; }
-        document.getElementById('sync-badge').style.display = 'block';
-        const item = q[0];
-        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(item) })
-        .then(r => r.json()).then(d => {
-           if(d.result === 'success') { q.shift(); localStorage.setItem('clinicDB', JSON.stringify(q)); checkSync(); } 
-           else { console.log("Sync Error: ", d.error); document.getElementById('sync-badge').style.display = 'none'; }
-        }).catch(e => { console.log("Network fail"); document.getElementById('sync-badge').style.display = 'none'; });
-      }
-
-      // ================= FORM LOGIC =================
+      // Form Logic
       const now = new Date();
-      const day = ("0" + now.getDate()).slice(-2);
-      const month = ("0" + (now.getMonth() + 1)).slice(-2);
-      const today = now.getFullYear() + "-" + (month) + "-" + (day);
+      const today = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2);
       document.getElementById('dateField').value = today;
-
       const starInputs = document.querySelectorAll('input[name="rating"]');
-      const starIcons = [document.getElementById('s1'),document.getElementById('s2'),document.getElementById('s3'),document.getElementById('s4'),document.getElementById('s5')];
+      const starIcons = [1,2,3,4,5].map(i=>document.getElementById('s'+i));
       const ratingVal = document.getElementById('rating-val');
       starInputs.forEach(input => { input.addEventListener('change', function() { const val = parseFloat(this.value); ratingVal.innerText = val.toFixed(1); updateStars(val); }); });
       function updateStars(val) { starIcons.forEach((icon, index) => { const num = index + 1; icon.style.fill = 'var(--gray-star)'; icon.innerHTML = '<use href="#icon-star"></use>'; if (val >= num) icon.style.fill = 'var(--gold)'; else if (val >= num - 0.5) { icon.style.fill = 'var(--gold)'; icon.innerHTML = '<use href="#icon-star-half"></use>'; } }); }
-      
-      function setupLogic(name, divId, val, isBeh) { 
-        document.getElementsByName(name).forEach(el => { 
-          el.addEventListener('change', () => { 
-            const div = document.getElementById(divId); 
-            let s = false; 
-            if(isBeh) { if(el.value==='Average'||el.value==='Poor') s=true; } 
-            else { if(el.value===val) s=true; } 
-            if(s) div.classList.add('show'); else div.classList.remove('show'); 
-          }); 
-        }); 
-      }
-      setupLogic('empBehaviour','followBehaviour','',true); 
-      setupLogic('docPolite','followDoc','',true); 
-      setupLogic('bookingSmooth','followBooking','No'); 
-      setupLogic('clinicClean','followClean','No');
+      function setupLogic(name, divId, val, isBeh) { document.getElementsByName(name).forEach(el => { el.addEventListener('change', () => { const div = document.getElementById(divId); let s = false; if(isBeh) { if(el.value==='Average'||el.value==='Poor') s=true; } else { if(el.value===val) s=true; } if(s) div.classList.add('show'); else div.classList.remove('show'); }); }); }
+      setupLogic('empBehaviour','followBehaviour','',true); setupLogic('docPolite','followDoc','',true); setupLogic('bookingSmooth','followBooking','No'); setupLogic('clinicClean','followClean','No');
       
       const form = document.getElementById('feedbackForm');
-      form.addEventListener('submit', e => { 
-        e.preventDefault(); 
-        const phone = document.getElementById('phoneInput').value;
-        if(phone.length !== 10) { alert("Please enter a valid 10-digit phone number."); return; }
-        setLoading(true); 
-        const fd = new FormData(form); let obj = {}; fd.forEach((v,k) => { obj[k] = obj[k] ? obj[k] + ", " + v : v; }); 
-        if(navigator.onLine) { sendData(obj); } else { saveOffline(obj); } 
-      });
-
-      function sendData(data) { fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) }).then(res => res.json()).then(resData => { if(resData.result === 'success') finishSubmission(data); else { alert("Error: " + resData.error); setLoading(false); } }).catch(err => { saveOffline(data); }); }
+      form.addEventListener('submit', e => { e.preventDefault(); const phone = document.getElementById('phoneInput').value; if(phone.length !== 10) { alert("Please enter a valid 10-digit phone number."); return; } setLoading(true); const fd = new FormData(form); let obj = {}; fd.forEach((v,k) => { obj[k] = obj[k] ? obj[k] + ", " + v : v; }); if(navigator.onLine) sendData(obj); else saveOffline(obj); });
+      function sendData(data) { fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) }).then(res => res.json()).then(resData => { if(resData.result === 'success') finishSubmission(data); else { alert("Error: " + resData.error); setLoading(false); } }).catch(err => saveOffline(data)); }
       function saveOffline(data) { let q = JSON.parse(localStorage.getItem('clinicDB') || "[]"); data._savedAt = new Date(); q.push(data); localStorage.setItem('clinicDB', JSON.stringify(q)); finishSubmission(data, true); setTimeout(checkSync, 2000); }
       function setLoading(isLoading) { const btn = document.getElementById('submitBtn'); const txt = document.getElementById('btnText'); const ldr = document.getElementById('btnLoader'); if(isLoading) { btn.disabled = true; txt.innerText = "SAVING..."; ldr.style.display = "block"; } else { btn.disabled = false; txt.innerText = "SUBMIT FEEDBACK"; ldr.style.display = "none"; } }
-      
-      function finishSubmission(data, isOffline) {
-        // CHECK FOR QR CODE
-        const rating = parseFloat(data.rating);
-        if(rating >= 4) {
-           showQr();
-           return; // Stop here, wait for manual close
-        }
-        triggerSuccessAnimation(isOffline ? "Saved to Device (Offline)" : "Feedback Saved");
-      }
-
-      function showQr() {
-         document.getElementById('main-view').style.display = 'none';
-         document.getElementById('qr-modal').style.display = 'flex';
-         // Generate QR
-         new QRious({ element: document.getElementById('qr-canvas'), value: GOOGLE_REVIEW_LINK, size: 200 });
-      }
-
-      function closeQr() {
-         document.getElementById('qr-modal').style.display = 'none';
-         triggerSuccessAnimation("Feedback Saved");
-      }
-
+      function finishSubmission(data, isOffline) { const rating = parseFloat(data.rating); if(rating >= 4) { showQr(); return; } triggerSuccessAnimation(isOffline ? "Saved to Device (Offline)" : "Feedback Saved"); }
+      function showQr() { document.getElementById('main-view').style.display = 'none'; const m = document.getElementById('qr-modal'); m.style.display = 'flex'; setTimeout(()=>m.classList.add('visible'), 10); new QRious({ element: document.getElementById('qr-canvas'), value: GOOGLE_REVIEW_LINK, size: 200 }); }
+      function closeQr() { document.getElementById('qr-modal').classList.remove('visible'); setTimeout(()=>{ document.getElementById('qr-modal').style.display = 'none'; triggerSuccessAnimation("Feedback Saved"); }, 300); }
       function triggerSuccessAnimation(msg) { document.querySelector('.success-title').innerText = msg; document.getElementById('main-view').style.display = 'none'; document.getElementById('success-view').style.display = 'flex'; setTimeout(() => { document.getElementById('success-view').style.opacity = '1'; }, 10); window.scrollTo(0,0); setTimeout(() => { resetAll(); }, 2500); }
       function resetAll() { document.getElementById('success-view').style.opacity = '0'; setTimeout(() => { document.getElementById('success-view').style.display = 'none'; document.getElementById('main-view').style.display = 'block'; form.reset(); document.getElementById('dateField').value = today; updateStars(0); ratingVal.innerText = "0.0"; document.querySelectorAll('.follow-up').forEach(x => x.classList.remove('show')); setLoading(false); setTimeout(() => { document.getElementById('caseInput').focus(); }, 100); }, 400); }
 
-      // ================= ADMIN LOGIC =================
-      let RAW_DATA = [];
-      let chartInstances = {};
-      let IS_ADMIN_SESSION = false;
-
-      function openAdmin() {
-        if(IS_ADMIN_SESSION) { showDashboard(); } 
-        else { document.getElementById('login-modal').style.display = 'flex'; document.getElementById('adminPass').focus(); }
-      }
+      // Admin Logic
+      let RAW_DATA = []; let chartInstances = {}; let IS_ADMIN_SESSION = false;
+      function openAdmin() { if(IS_ADMIN_SESSION) showDashboard(); else { document.getElementById('login-modal').style.display = 'flex'; document.getElementById('adminPass').focus(); } }
       function closeAdmin() { document.getElementById('login-modal').style.display = 'none'; document.getElementById('admin-app').style.display = 'none'; document.getElementById('patient-view').style.display = 'block'; window.scrollTo(0,0); }
-      document.getElementById('adminPass').addEventListener('keyup', function(e) { if (e.key === 'Enter') attemptLogin(); });
+      document.getElementById('adminPass').addEventListener('keyup', e => { if (e.key === 'Enter') attemptLogin(); });
       function attemptLogin() { const p = document.getElementById('adminPass').value; const btn = document.getElementById('btnLogin'); const msg = document.getElementById('login-msg'); btn.innerText = "Checking..."; msg.innerText = ""; fetch(SCRIPT_URL + `?action=login&pass=${p}`).then(r => r.json()).then(d => { if(d.result === 'success') { IS_ADMIN_SESSION = true; document.getElementById('login-modal').style.display = 'none'; document.getElementById('adminPass').value = ""; showDashboard(); } else { msg.innerText = "Incorrect Password"; } btn.innerText = "ENTER"; }).catch(e => { msg.innerText = "Network Error"; btn.innerText = "ENTER"; }); }
       function logout() { IS_ADMIN_SESSION = false; closeAdmin(); }
       function showDashboard() { document.getElementById('patient-view').style.display = 'none'; document.getElementById('admin-app').style.display = 'block'; if(RAW_DATA.length === 0) loadData(); }
-
-      function loadData(startStr, endStr) {
-        document.getElementById('dashboard-loader').style.display = 'flex';
-        let url = SCRIPT_URL + `?action=getData`;
-        if(startStr && endStr) { url += `&start=${startStr}&end=${endStr}`; document.getElementById('date-range-lbl').innerText = `${startStr} to ${endStr}`; } 
-        else { document.getElementById('date-range-lbl').innerText = "Last 30 Days"; const past = new Date(); past.setDate(now.getDate()-30); document.getElementById('filter-end').value = today; document.getElementById('filter-start').valueAsDate = past; }
-        fetch(url).then(r=>r.json()).then(d => { if(d.result === 'success') { RAW_DATA = d.data; processData(RAW_DATA); } else { alert("Error loading data"); } document.getElementById('dashboard-loader').style.display = 'none'; });
-      }
-
-      function processData(data) {
-        document.getElementById('kpi-total').innerText = data.length;
-        const avg = data.reduce((acc, r) => acc + (parseFloat(r['Rating'])||0), 0) / (data.length||1);
-        document.getElementById('kpi-csi').innerText = Math.round((avg/5)*100) + "%";
-        document.getElementById('trend-title').innerText = "Rating Trend (Avg: " + avg.toFixed(1) + ")";
-        renderCharts(data);
-        renderList(data);
-      }
-
-      function renderList(data) {
-        const c = document.getElementById('records-container');
-        c.innerHTML = "";
-        data.forEach(r => {
-          let dateTxt = "N/A";
-          if(r['Visit Date']) dateTxt = new Date(r['Visit Date']).toLocaleDateString();
-          else if(r['Timestamp']) dateTxt = new Date(r['Timestamp']).toLocaleDateString();
-          const card = document.createElement('div');
-          card.className = "record-card";
-          let commentsHtml = "";
-          if(r['Emp Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Support Staff</span>${r['Emp Comments']}</div>`;
-          if(r['Doctor Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Doctor</span>${r['Doctor Comments']}</div>`;
-          if(r['Booking Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Booking</span>${r['Booking Comments']}</div>`;
-          if(r['Cleanliness Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Cleanliness</span>${r['Cleanliness Comments']}</div>`;
-          card.innerHTML = `
-            <div class="rc-header"><span class="rc-id">${r['Case Number']}</span><span class="rc-date">${dateTxt}</span></div>
-            <div class="rc-row"><span class="rc-name">${r['Patient Name']}</span><span class="rc-rating">${r['Rating']} ★</span></div>
-            <div class="rc-details">
-              <div><span class="rc-label">Phone:</span> <span>${r['Phone Number'] || '-'}</span></div>
-              <div><span class="rc-label">Doctor:</span> <span>${r['Consulting Doctor'] || '-'}</span></div>
-              <div><span class="rc-label">Dept:</span> <span>${r['Department']}</span></div>
-              <div><span class="rc-label">Staff Behav:</span> <span>${r['Emp Behaviour']}</span></div>
-              <div><span class="rc-label">Doc Consult:</span> <span>${r['Doctor Polite']}</span></div>
-              <div><span class="rc-label">Booking:</span> <span>${r['Booking Smooth']}</span></div>
-              <div><span class="rc-label">Cleanliness:</span> <span>${r['Clinic Clean']}</span></div>
-              ${commentsHtml}
-              <div style="display:block; margin-top:5px; font-style:italic; font-size:12px; color:#666;">"${r['Suggestion']||'No suggestions'}"</div>
-            </div>
-          `;
-          card.onclick = function() { const det = this.querySelector('.rc-details'); det.style.display = det.style.display==='block' ? 'none' : 'block'; };
-          c.appendChild(card);
-        });
-      }
-
-      // --- FILTER LOGIC ---
-      function openFilter() { document.getElementById('drawer-overlay').style.display = 'block'; setTimeout(()=>document.getElementById('filter-drawer').classList.add('open'), 10); }
-      function closeFilter() { document.getElementById('filter-drawer').classList.remove('open'); setTimeout(()=>document.getElementById('drawer-overlay').style.display = 'none', 300); }
       
-      function resetFilters() {
-         document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-         document.getElementById('filter-book').value = "All";
-         document.getElementById('filter-clean').value = "All";
-         document.getElementById('filter-source').value = "All";
-         document.getElementById('filter-rate-min').value = "0";
-         document.getElementById('filter-rate-max').value = "5";
-         const past = new Date(); past.setDate(now.getDate()-30);
-         document.getElementById('filter-end').value = today;
-         document.getElementById('filter-start').valueAsDate = past;
-         loadData(); closeFilter();
-      }
-
-      function applyFilter() {
-        const start = document.getElementById('filter-start').value;
-        const end = document.getElementById('filter-end').value;
-        document.getElementById('filter-loader').style.display = 'flex';
-        if(start && end) {
-           let url = SCRIPT_URL + `?action=getData&start=${start}&end=${end}`;
-           document.getElementById('date-range-lbl').innerText = `${start} to ${end}`;
-           fetch(url).then(r=>r.json()).then(d => {
-             if(d.result==='success') { RAW_DATA = d.data; runLocalFilters(); }
-             document.getElementById('filter-loader').style.display = 'none';
-           });
-        } else { runLocalFilters(); document.getElementById('filter-loader').style.display = 'none'; }
-        closeFilter();
-      }
-
-      function runLocalFilters() {
-        // GET CHECKBOX VALUES
-        const getChecked = (id) => Array.from(document.querySelectorAll(`#${id} input:checked`)).map(cb => cb.value);
-        const depts = getChecked('dept-list-container');
-        const emps = getChecked('emp-list-container');
-        const docs = getChecked('doc-list-container');
-
-        const f_book = document.getElementById('filter-book').value;
-        const f_clean = document.getElementById('filter-clean').value;
-        const f_source = document.getElementById('filter-source').value;
-        const f_min = parseFloat(document.getElementById('filter-rate-min').value);
-        const f_max = parseFloat(document.getElementById('filter-rate-max').value);
-
-        let local = RAW_DATA.filter(r => {
-          if(depts.length > 0 && !depts.includes(r['Department'])) return false;
-          if(emps.length > 0 && !emps.includes(r['Emp Behaviour'])) return false;
-          
-          if(docs.length > 0) {
-            let val = r['Doctor Polite'];
-            if(val === 'Yes') val = 'Good'; 
-            if(val === 'No') val = 'Poor'; 
-            if(!docs.includes(val)) return false;
-          }
-
-          if(f_book !== 'All' && r['Booking Smooth'] !== f_book) return false;
-          if(f_clean !== 'All' && r['Clinic Clean'] !== f_clean) return false;
-          if(f_source !== 'All' && !(r['Source']||'').includes(f_source)) return false;
-          let rate = parseFloat(r['Rating']) || 0;
-          if(rate < f_min || rate > f_max) return false;
-          return true;
-        });
-        processData(local); 
+      function switchTab(t) { 
+        document.querySelectorAll('.tab-content').forEach(d => d.classList.add('hidden')); 
+        document.querySelectorAll('.nav-tab').forEach(d => d.classList.remove('active')); 
+        document.getElementById('tab-'+t).classList.remove('hidden'); 
+        event.target.classList.add('active'); 
+        
+        // SHOW/HIDE FILTER BUTTON
+        const fab = document.getElementById('records-filter-btn');
+        if(t === 'records') fab.style.display = 'flex'; 
+        else fab.style.display = 'none'; 
       }
 
       function changePassword() { const o = document.getElementById('oldPass').value; const n = document.getElementById('newPass').value; fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({action:'changePassword', oldPass:o, newPass:n}) }).then(r=>r.json()).then(d=>{ if(d.result==='success') { alert("Password Changed"); document.getElementById('oldPass').value=""; document.getElementById('newPass').value=""; } else alert("Error: " + d.error); }); }
-      function switchTab(t) { document.querySelectorAll('.tab-content').forEach(d => d.classList.add('hidden')); document.querySelectorAll('.nav-tab').forEach(d => d.classList.remove('active')); document.getElementById('tab-'+t).classList.remove('hidden'); event.target.classList.add('active'); }
 
-      function renderCharts(data) {
-        ['chartTrend','chartOps','chartEmp','chartSource'].forEach(id => { if(chartInstances[id]) chartInstances[id].destroy(); });
-        const dates = {};
-        data.forEach(r => { let d = 'Unknown'; if(r['Visit Date']) d = new Date(r['Visit Date']).toLocaleDateString('en-CA'); if(!dates[d]) dates[d] = []; dates[d].push(parseFloat(r['Rating'])||0); });
-        const lbls = Object.keys(dates).sort();
-        const avgs = lbls.map(d => dates[d].reduce((a,b)=>a+b,0)/dates[d].length);
-        chartInstances['chartTrend'] = new Chart(document.getElementById('chartTrend'), { type: 'line', data: { labels: lbls, datasets: [{ label: 'Avg Rating', data: avgs, borderColor: '#008080', tension: 0.3 }] } });
-        const srcs = {}; data.forEach(r => { let s = r['Source'] || 'Unknown'; s.split(',').forEach(x => { x=x.trim(); srcs[x] = (srcs[x]||0)+1; }); });
-        chartInstances['chartSource'] = new Chart(document.getElementById('chartSource'), { type: 'bar', data: { labels: Object.keys(srcs), datasets: [{ label: 'Count', data: Object.values(srcs), backgroundColor: '#FFD700' }] } });
-        
-        const staff = { 'Excellent':0, 'Good':0, 'Average':0, 'Poor':0 };
-        const doc = { 'Excellent':0, 'Good':0, 'Average':0, 'Poor':0 };
-        data.forEach(r => { 
-          if(staff[r['Emp Behaviour']] !== undefined) staff[r['Emp Behaviour']]++; 
-          let dVal = r['Doctor Polite']; if(dVal === 'Yes') dVal = 'Good'; if(dVal === 'No') dVal = 'Poor';
-          if(doc[dVal] !== undefined) doc[dVal]++;
-        });
-        chartInstances['chartEmp'] = new Chart(document.getElementById('chartEmp'), { type: 'bar', data: { labels: ['Excellent', 'Good', 'Average', 'Poor'], datasets: [ { label: 'Support Staff', data: [staff.Excellent, staff.Good, staff.Average, staff.Poor], backgroundColor: '#28a745' }, { label: 'Doctor', data: [doc.Excellent, doc.Good, doc.Average, doc.Poor], backgroundColor: '#007bff' } ] } });
-        const ops = { 'Booking Smooth': {Yes:0, No:0}, 'Clinic Clean': {Yes:0, No:0} };
-        data.forEach(r => { ['Booking Smooth','Clinic Clean'].forEach(k => { let val = r[k] === 'Yes' ? 'Yes' : 'No'; ops[k][val]++; }); });
-        chartInstances['chartOps'] = new Chart(document.getElementById('chartOps'), { type: 'bar', data: { labels: ['Booking', 'Cleanliness'], datasets: [ { label: 'Yes', data: [ops['Booking Smooth'].Yes, ops['Clinic Clean'].Yes], backgroundColor: '#28a745' }, { label: 'No', data: [ops['Booking Smooth'].No, ops['Clinic Clean'].No], backgroundColor: '#dc3545' } ] }, options: { scales: { x: { stacked: true }, y: { stacked: true } } } });
-      }
+      function loadData(startStr, endStr) { document.getElementById('dashboard-loader').style.display = 'flex'; let url = SCRIPT_URL + `?action=getData`; if(startStr && endStr) { url += `&start=${startStr}&end=${endStr}`; document.getElementById('date-range-lbl').innerText = `${startStr} to ${endStr}`; } else { document.getElementById('date-range-lbl').innerText = "Last 30 Days"; const past = new Date(); past.setDate(now.getDate()-30); document.getElementById('filter-end').value = today; document.getElementById('filter-start').valueAsDate = past; } fetch(url).then(r=>r.json()).then(d => { if(d.result === 'success') { RAW_DATA = d.data; processData(RAW_DATA); } else { alert("Error loading data"); } document.getElementById('dashboard-loader').style.display = 'none'; }); }
+      function processData(data) { document.getElementById('kpi-total').innerText = data.length; const avg = data.reduce((acc, r) => acc + (parseFloat(r['Rating'])||0), 0) / (data.length||1); document.getElementById('kpi-csi').innerText = Math.round((avg/5)*100) + "%"; document.getElementById('trend-title').innerText = "Rating Trend (Avg: " + avg.toFixed(1) + ")"; renderCharts(data); renderList(data); }
+      function renderList(data) { const c = document.getElementById('records-container'); c.innerHTML = ""; data.forEach(r => { let dateTxt = "N/A"; if(r['Visit Date']) dateTxt = new Date(r['Visit Date']).toLocaleDateString(); else if(r['Timestamp']) dateTxt = new Date(r['Timestamp']).toLocaleDateString(); const card = document.createElement('div'); card.className = "record-card"; let commentsHtml = ""; if(r['Emp Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Support Staff</span>${r['Emp Comments']}</div>`; if(r['Doctor Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Doctor</span>${r['Doctor Comments']}</div>`; if(r['Booking Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Booking</span>${r['Booking Comments']}</div>`; if(r['Cleanliness Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Cleanliness</span>${r['Cleanliness Comments']}</div>`; card.innerHTML = `<div class="rc-header"><span class="rc-id">${r['Case Number']}</span><span class="rc-date">${dateTxt}</span></div><div class="rc-row"><span class="rc-name">${r['Patient Name']}</span><span class="rc-rating">${r['Rating']} ★</span></div><div class="rc-details"><div><span class="rc-label">Phone:</span> <span>${r['Phone Number'] || '-'}</span></div><div><span class="rc-label">Doctor:</span> <span>${r['Consulting Doctor'] || '-'}</span></div><div><span class="rc-label">Dept:</span> <span>${r['Department']}</span></div><div><span class="rc-label">Staff Behav:</span> <span>${r['Emp Behaviour']}</span></div><div><span class="rc-label">Doc Consult:</span> <span>${r['Doctor Polite']}</span></div><div><span class="rc-label">Booking:</span> <span>${r['Booking Smooth']}</span></div><div><span class="rc-label">Cleanliness:</span> <span>${r['Clinic Clean']}</span></div>${commentsHtml}<div style="display:block; margin-top:5px; font-style:italic; font-size:12px; color:#666;">"${r['Suggestion']||'No suggestions'}"</div></div>`; card.onclick = function() { const det = this.querySelector('.rc-details'); det.style.display = det.style.display==='block' ? 'none' : 'block'; }; c.appendChild(card); }); }
+      
+      // Filter Logic
+      function openFilter() { document.getElementById('drawer-overlay').style.display = 'block'; setTimeout(()=>document.getElementById('filter-drawer').classList.add('open'), 10); }
+      function closeFilter() { document.getElementById('filter-drawer').classList.remove('open'); setTimeout(()=>document.getElementById('drawer-overlay').style.display = 'none', 300); }
+      function resetFilters() { document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false); document.getElementById('filter-book').value = "All"; document.getElementById('filter-clean').value = "All"; document.getElementById('filter-source').value = "All"; document.getElementById('filter-rate-min').value = "0"; document.getElementById('filter-rate-max').value = "5"; const past = new Date(); past.setDate(now.getDate()-30); document.getElementById('filter-end').value = today; document.getElementById('filter-start').valueAsDate = past; loadData(); closeFilter(); }
+      function applyFilter() { const start = document.getElementById('filter-start').value; const end = document.getElementById('filter-end').value; document.getElementById('filter-loader').style.display = 'flex'; if(start && end) { let url = SCRIPT_URL + `?action=getData&start=${start}&end=${end}`; document.getElementById('date-range-lbl').innerText = `${start} to ${end}`; fetch(url).then(r=>r.json()).then(d => { if(d.result==='success') { RAW_DATA = d.data; runLocalFilters(); } document.getElementById('filter-loader').style.display = 'none'; }); } else { runLocalFilters(); document.getElementById('filter-loader').style.display = 'none'; } closeFilter(); }
+      function runLocalFilters() { const getChecked = (id) => Array.from(document.querySelectorAll(`#${id} input:checked`)).map(cb => cb.value); const depts = getChecked('dept-list-container'); const emps = getChecked('emp-list-container'); const docs = getChecked('doc-list-container'); const f_book = document.getElementById('filter-book').value; const f_clean = document.getElementById('filter-clean').value; const f_source = document.getElementById('filter-source').value; const f_min = parseFloat(document.getElementById('filter-rate-min').value); const f_max = parseFloat(document.getElementById('filter-rate-max').value); let local = RAW_DATA.filter(r => { if(depts.length > 0 && !depts.includes(r['Department'])) return false; if(emps.length > 0 && !emps.includes(r['Emp Behaviour'])) return false; if(docs.length > 0) { let val = r['Doctor Polite']; if(val === 'Yes') val = 'Good'; if(val === 'No') val = 'Poor'; if(!docs.includes(val)) return false; } if(f_book !== 'All' && r['Booking Smooth'] !== f_book) return false; if(f_clean !== 'All' && r['Clinic Clean'] !== f_clean) return false; if(f_source !== 'All' && !(r['Source']||'').includes(f_source)) return false; let rate = parseFloat(r['Rating']) || 0; if(rate < f_min || rate > f_max) return false; return true; }); processData(local); }
+
+      function renderCharts(data) { ['chartTrend','chartOps','chartEmp','chartSource'].forEach(id => { if(chartInstances[id]) chartInstances[id].destroy(); }); const dates = {}; data.forEach(r => { let d = 'Unknown'; if(r['Visit Date']) d = new Date(r['Visit Date']).toLocaleDateString('en-CA'); if(!dates[d]) dates[d] = []; dates[d].push(parseFloat(r['Rating'])||0); }); const lbls = Object.keys(dates).sort(); const avgs = lbls.map(d => dates[d].reduce((a,b)=>a+b,0)/dates[d].length); chartInstances['chartTrend'] = new Chart(document.getElementById('chartTrend'), { type: 'line', data: { labels: lbls, datasets: [{ label: 'Avg Rating', data: avgs, borderColor: '#008080', tension: 0.3 }] } }); const srcs = {}; data.forEach(r => { let s = r['Source'] || 'Unknown'; s.split(',').forEach(x => { x=x.trim(); srcs[x] = (srcs[x]||0)+1; }); }); chartInstances['chartSource'] = new Chart(document.getElementById('chartSource'), { type: 'bar', data: { labels: Object.keys(srcs), datasets: [{ label: 'Count', data: Object.values(srcs), backgroundColor: '#FFD700' }] } }); const staff = { 'Excellent':0, 'Good':0, 'Average':0, 'Poor':0 }; const doc = { 'Excellent':0, 'Good':0, 'Average':0, 'Poor':0 }; data.forEach(r => { if(staff[r['Emp Behaviour']] !== undefined) staff[r['Emp Behaviour']]++; let dVal = r['Doctor Polite']; if(dVal === 'Yes') dVal = 'Good'; if(dVal === 'No') dVal = 'Poor'; if(doc[dVal] !== undefined) doc[dVal]++; }); chartInstances['chartEmp'] = new Chart(document.getElementById('chartEmp'), { type: 'bar', data: { labels: ['Excellent', 'Good', 'Average', 'Poor'], datasets: [ { label: 'Support Staff', data: [staff.Excellent, staff.Good, staff.Average, staff.Poor], backgroundColor: '#28a745' }, { label: 'Doctor', data: [doc.Excellent, doc.Good, doc.Average, doc.Poor], backgroundColor: '#007bff' } ] } }); const ops = { 'Booking Smooth': {Yes:0, No:0}, 'Clinic Clean': {Yes:0, No:0} }; data.forEach(r => { ['Booking Smooth','Clinic Clean'].forEach(k => { let val = r[k] === 'Yes' ? 'Yes' : 'No'; ops[k][val]++; }); }); chartInstances['chartOps'] = new Chart(document.getElementById('chartOps'), { type: 'bar', data: { labels: ['Booking', 'Cleanliness'], datasets: [ { label: 'Yes', data: [ops['Booking Smooth'].Yes, ops['Clinic Clean'].Yes], backgroundColor: '#28a745' }, { label: 'No', data: [ops['Booking Smooth'].No, ops['Clinic Clean'].No], backgroundColor: '#dc3545' } ] }, options: { scales: { x: { stacked: true }, y: { stacked: true } } } }); }
     </script>
   </body>
 </html>

@@ -41,6 +41,13 @@
       #qr-canvas { background: white; padding: 10px; border-radius: 12px; margin: 20px 0; }
       .qr-btn { background: white; color: #333; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; cursor: pointer; margin-top: 20px; }
 
+      /* --- SUCCESS VIEW (FIXED) --- */
+      #success-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1500; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.5s ease; text-align: center; }
+      .success-content { transform: translateY(20px); transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+      .check-circle { width: 80px; height: 80px; background: #e6f7f7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--primary); font-size: 30px; }
+      .success-title { font-size: 22px; font-weight: 600; color: #333; margin-bottom: 5px; }
+      .success-sub { font-size: 14px; color: #666; margin-bottom: 30px; }
+
       /* --- FORM STYLES --- */
       .header { background: var(--primary); color: white; padding: 25px 20px; text-align: center; position: relative; }
       .header h2 { margin: 0; font-weight: 600; font-size: 22px; }
@@ -149,17 +156,15 @@
         }
 
         /* Charts 2x2 Grid */
-        /* Chart 1 (Trend), Chart 2 (Emp), Chart 3 (Ops), Chart 4 (Source) */
-        /* They naturally fall into the 2-column grid defined in #tab-dash */
         .container.wide-mode .chart-container {
           margin: 0;
           height: 100%;
         }
 
-        /* Records List Grid on Wide Screens */
+        /* Records List Grid on Wide Screens - FIX: 2 PER ROW */
         .container.wide-mode .records-list {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          grid-template-columns: 1fr 1fr; /* Force 2 columns exactly */
           gap: 15px;
         }
         .container.wide-mode .record-card {
@@ -198,7 +203,16 @@
 
       <div id="patient-view">
         <div id="sync-badge"><i class="fas fa-sync fa-spin"></i> Syncing...</div>
-        <div id="success-view"><div class="success-content"><div class="check-circle"><i class="fas fa-check"></i></div><div class="success-title">Feedback Saved</div><div class="success-sub">Thank you for your valuable input.</div><p style="font-size:12px; color:#999;">Form will refresh automatically...</p></div></div>
+        <!-- SUCCESS VIEW -->
+        <div id="success-view">
+          <div class="success-content">
+            <div class="check-circle"><i class="fas fa-check"></i></div>
+            <div class="success-title">Feedback Saved</div>
+            <div class="success-sub">Thank you for your valuable input.</div>
+            <p style="font-size:12px; color:#999;">Form will refresh automatically...</p>
+          </div>
+        </div>
+        
         <div id="main-view">
           <div class="header"><h2>Clinic Feedback</h2><p>We value your input</p><div class="admin-btn" onclick="openAdmin()"><i class="fas fa-lock"></i></div></div>
           <div class="form-body">
@@ -317,7 +331,16 @@
       function finishSubmission(data, isOffline) { const rating = parseFloat(data.rating); if(rating >= 4) { showQr(); return; } triggerSuccessAnimation(isOffline ? "Saved to Device (Offline)" : "Feedback Saved"); }
       function showQr() { document.getElementById('main-view').style.display = 'none'; const m = document.getElementById('qr-modal'); m.style.display = 'flex'; setTimeout(()=>m.classList.add('visible'), 10); new QRious({ element: document.getElementById('qr-canvas'), value: GOOGLE_REVIEW_LINK, size: 200 }); }
       function closeQr() { document.getElementById('qr-modal').classList.remove('visible'); setTimeout(()=>{ document.getElementById('qr-modal').style.display = 'none'; triggerSuccessAnimation("Feedback Saved"); }, 300); }
-      function triggerSuccessAnimation(msg) { document.querySelector('.success-title').innerText = msg; document.getElementById('main-view').style.display = 'none'; document.getElementById('success-view').style.display = 'flex'; setTimeout(() => { document.getElementById('success-view').style.opacity = '1'; }, 10); window.scrollTo(0,0); setTimeout(() => { resetAll(); }, 2500); }
+      function triggerSuccessAnimation(msg) { 
+        document.querySelector('.success-title').innerText = msg; 
+        document.getElementById('main-view').style.display = 'none'; 
+        // 1. Make visible (display:flex)
+        document.getElementById('success-view').style.display = 'flex'; 
+        // 2. Fade In (opacity:1)
+        setTimeout(() => { document.getElementById('success-view').style.opacity = '1'; }, 10); 
+        window.scrollTo(0,0); 
+        setTimeout(() => { resetAll(); }, 2500); 
+      }
       function resetAll() { document.getElementById('success-view').style.opacity = '0'; setTimeout(() => { document.getElementById('success-view').style.display = 'none'; document.getElementById('main-view').style.display = 'block'; form.reset(); document.getElementById('dateField').value = today; updateStars(0); ratingVal.innerText = "0.0"; document.querySelectorAll('.follow-up').forEach(x => x.classList.remove('show')); setLoading(false); setTimeout(() => { document.getElementById('caseInput').focus(); }, 100); }, 400); }
 
       // Admin Logic
@@ -327,8 +350,9 @@
         document.getElementById('login-modal').style.display = 'none'; 
         document.getElementById('admin-app').style.display = 'none'; 
         document.getElementById('patient-view').style.display = 'block'; 
-        // Remove Wide Mode
         document.querySelector('.container').classList.remove('wide-mode');
+        // Hide filter button when leaving admin
+        document.getElementById('records-filter-btn').style.display = 'none';
         window.scrollTo(0,0); 
       }
       document.getElementById('adminPass').addEventListener('keyup', e => { if (e.key === 'Enter') attemptLogin(); });
@@ -338,8 +362,11 @@
       function showDashboard() { 
         document.getElementById('patient-view').style.display = 'none'; 
         document.getElementById('admin-app').style.display = 'block'; 
-        // Add Wide Mode class for responsive layout
         document.querySelector('.container').classList.add('wide-mode');
+        
+        // FIX: Explicitly show Filter Button for Dash
+        document.getElementById('records-filter-btn').style.display = 'flex';
+
         if(RAW_DATA.length === 0) loadData(); 
       }
       
@@ -349,7 +376,6 @@
         document.getElementById('tab-'+t).classList.remove('hidden'); 
         event.target.classList.add('active'); 
         
-        // SHOW/HIDE FILTER BUTTON (Visible on Dash OR Records)
         const fab = document.getElementById('records-filter-btn');
         if(t === 'records' || t === 'dash') fab.style.display = 'flex'; 
         else fab.style.display = 'none'; 

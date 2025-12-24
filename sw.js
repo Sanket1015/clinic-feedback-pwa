@@ -1,4 +1,4 @@
-const CACHE_NAME = 'clinic-feedback-v14'; // Bumped to v14 to force update
+const CACHE_NAME = 'clinic-feedback-v15'; // Bumped to v15
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

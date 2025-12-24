@@ -19,7 +19,13 @@
       :root { --primary: #008080; --primary-dark: #006666; --bg-body: #f4f7f6; --bg-card: #FFFFFF; --text: #333; --border: #e0e0e0; --gold: #FFD700; --gray-star: #e0e0e0; --success: #28a745; --danger: #dc3545; }
       * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
       body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; background-color: var(--bg-body); color: var(--text); overflow-x: hidden; min-height: 100vh; }
-      .container { max-width: 600px; margin: 20px auto; background: var(--bg-card); min-height: 90vh; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; position: relative; }
+      
+      /* CONTAINER TRANSITION FOR ADMIN MODE */
+      .container { max-width: 600px; margin: 20px auto; background: var(--bg-card); min-height: 90vh; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; position: relative; transition: max-width 0.3s ease; }
+      
+      /* WIDE MODE CLASS (Applied via JS when Admin is open) */
+      .container.wide-mode { max-width: 95%; margin-top: 10px; }
+
       .hidden { display: none !important; }
 
       /* --- UPDATE NOTIFICATION --- */
@@ -118,6 +124,49 @@
       #dashboard-loader h4 { color: var(--primary); margin-top: 15px; }
       .big-spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
       #filter-loader { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; color: white; flex-direction: column; }
+      
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+      /* --- MEDIA QUERIES FOR LAPTOPS / LANDSCAPE --- */
+      @media (min-width: 800px) {
+        /* When Wide Mode is active (Admin Dashboard) */
+        .container.wide-mode #tab-dash {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          padding: 20px;
+        }
+        
+        /* Make KPI cards span full width (arranged flex inside) or span 2 cols */
+        .container.wide-mode .dash-grid {
+          grid-column: span 2;
+          display: flex;
+          justify-content: center;
+          gap: 30px;
+        }
+        .container.wide-mode .kpi-card {
+          min-width: 250px;
+        }
+
+        /* Charts 2x2 Grid */
+        /* Chart 1 (Trend), Chart 2 (Emp), Chart 3 (Ops), Chart 4 (Source) */
+        /* They naturally fall into the 2-column grid defined in #tab-dash */
+        .container.wide-mode .chart-container {
+          margin: 0;
+          height: 100%;
+        }
+
+        /* Records List Grid on Wide Screens */
+        .container.wide-mode .records-list {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 15px;
+        }
+        .container.wide-mode .record-card {
+          margin-bottom: 0;
+          height: fit-content;
+        }
+      }
     </style>
   </head>
   <body>
@@ -203,7 +252,7 @@
           <div style="text-align:center; padding:20px; color:#999; font-size:12px;">End of loaded records.<br>Use "Change" above to search older dates.</div>
         </div>
 
-        <!-- FILTER BUTTON (RECORDS ONLY) -->
+        <!-- FILTER BUTTON (RECORDS & DASH) -->
         <div class="fab-filter" id="records-filter-btn" onclick="openFilter()"><i class="fas fa-filter"></i></div>
 
         <div id="tab-settings" class="tab-content hidden" style="padding:20px;">
@@ -274,11 +323,25 @@
       // Admin Logic
       let RAW_DATA = []; let chartInstances = {}; let IS_ADMIN_SESSION = false;
       function openAdmin() { if(IS_ADMIN_SESSION) showDashboard(); else { document.getElementById('login-modal').style.display = 'flex'; document.getElementById('adminPass').focus(); } }
-      function closeAdmin() { document.getElementById('login-modal').style.display = 'none'; document.getElementById('admin-app').style.display = 'none'; document.getElementById('patient-view').style.display = 'block'; window.scrollTo(0,0); }
+      function closeAdmin() { 
+        document.getElementById('login-modal').style.display = 'none'; 
+        document.getElementById('admin-app').style.display = 'none'; 
+        document.getElementById('patient-view').style.display = 'block'; 
+        // Remove Wide Mode
+        document.querySelector('.container').classList.remove('wide-mode');
+        window.scrollTo(0,0); 
+      }
       document.getElementById('adminPass').addEventListener('keyup', e => { if (e.key === 'Enter') attemptLogin(); });
       function attemptLogin() { const p = document.getElementById('adminPass').value; const btn = document.getElementById('btnLogin'); const msg = document.getElementById('login-msg'); btn.innerText = "Checking..."; msg.innerText = ""; fetch(SCRIPT_URL + `?action=login&pass=${p}`).then(r => r.json()).then(d => { if(d.result === 'success') { IS_ADMIN_SESSION = true; document.getElementById('login-modal').style.display = 'none'; document.getElementById('adminPass').value = ""; showDashboard(); } else { msg.innerText = "Incorrect Password"; } btn.innerText = "ENTER"; }).catch(e => { msg.innerText = "Network Error"; btn.innerText = "ENTER"; }); }
       function logout() { IS_ADMIN_SESSION = false; closeAdmin(); }
-      function showDashboard() { document.getElementById('patient-view').style.display = 'none'; document.getElementById('admin-app').style.display = 'block'; if(RAW_DATA.length === 0) loadData(); }
+      
+      function showDashboard() { 
+        document.getElementById('patient-view').style.display = 'none'; 
+        document.getElementById('admin-app').style.display = 'block'; 
+        // Add Wide Mode class for responsive layout
+        document.querySelector('.container').classList.add('wide-mode');
+        if(RAW_DATA.length === 0) loadData(); 
+      }
       
       function switchTab(t) { 
         document.querySelectorAll('.tab-content').forEach(d => d.classList.add('hidden')); 
@@ -286,9 +349,9 @@
         document.getElementById('tab-'+t).classList.remove('hidden'); 
         event.target.classList.add('active'); 
         
-        // SHOW/HIDE FILTER BUTTON
+        // SHOW/HIDE FILTER BUTTON (Visible on Dash OR Records)
         const fab = document.getElementById('records-filter-btn');
-        if(t === 'records') fab.style.display = 'flex'; 
+        if(t === 'records' || t === 'dash') fab.style.display = 'flex'; 
         else fab.style.display = 'none'; 
       }
 

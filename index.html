@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     
     <style>
       /* --- GLOBAL STYLES --- */
@@ -25,6 +26,11 @@
       #update-notification { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 20px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; align-items: center; gap: 15px; width: 90%; max-width: 400px; }
       #update-notification span { flex: 1; font-size: 13px; }
       #update-reload { background: var(--primary); color: white; border: none; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+      /* --- QR MODAL --- */
+      #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
+      #qr-canvas { background: white; padding: 10px; border-radius: 12px; margin: 20px 0; }
+      .qr-btn { background: white; color: #333; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; cursor: pointer; margin-top: 20px; }
 
       /* --- FORM STYLES --- */
       .header { background: var(--primary); color: white; padding: 25px 20px; text-align: center; position: relative; }
@@ -94,7 +100,6 @@
       .rc-details div { margin-bottom: 4px; display: flex; justify-content: space-between; }
       .rc-label { font-weight: 500; color: #000; margin-right: 10px; }
       
-      /* COMMENTS IN RECORDS */
       .rc-comment-box { margin-top: 8px; background: #f9f9f9; padding: 8px; border-radius: 4px; border-left: 3px solid var(--primary); font-size: 12px; color: #555; }
       .rc-comment-lbl { font-weight: 600; font-size: 11px; color: var(--primary); text-transform: uppercase; display: block; margin-bottom: 2px; }
 
@@ -127,6 +132,15 @@
       <button id="update-reload">REFRESH</button>
     </div>
 
+    <!-- QR MODAL -->
+    <div id="qr-modal">
+      <h3 style="margin-bottom:5px;">Thank You!</h3>
+      <p style="margin-top:0; opacity:0.8;">Glad you liked our service.</p>
+      <p style="font-size:14px;">Please scan to rate us on Google:</p>
+      <canvas id="qr-canvas"></canvas>
+      <button class="qr-btn" onclick="closeQr()">Done</button>
+    </div>
+
     <div class="container">
       
       <div id="filter-loader">
@@ -149,10 +163,8 @@
               <div class="form-group"><label>4. Date of Visit *</label><input type="date" name="visitDate" id="dateField" required></div>
               <div class="form-group"><label>5. Disease Department</label><select name="department"><option value="" disabled selected>Select Department</option><option>Cardiology</option><option>Dermatology</option><option>E.N.T</option><option>Endocrinology & Metabolic Disorder</option><option>Gastroenterology</option><option>General / Systemic Disease</option><option>Gynaecology & Obstetrics</option><option>Haematology</option><option>Infectious Diseases</option><option>Male Reproductive System Pathology</option><option>Nephrology</option><option>Neurology</option><option>Oncology</option><option>Ophthalmology</option><option>Oral Pathology</option><option>Ortho and Muscular Disorder</option><option>Psychiatry</option><option>Pulmonology</option><option>Sexual Complain</option><option>Urology</option><option>Vascular Medicine</option><option>Other</option></select></div>
               
-              <!-- CHANGED: Support Staff -->
               <div class="form-group"><label>6. Behaviour of Support staff *</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Excellent" required> Excellent</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Good"> Good</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Average"> Average</label><label class="radio-option"><input type="radio" name="empBehaviour" value="Poor"> Poor</label><div id="followBehaviour" class="follow-up"><label>Please let us know what can be improved</label><textarea name="empComments" rows="3"></textarea></div></div>
               
-              <!-- CHANGED: Doctor Consultation & Options -->
               <div class="form-group"><label>7. How was the doctor’s consultation and explanation? *</label>
                 <label class="radio-option"><input type="radio" name="docPolite" value="Excellent" required> Excellent</label>
                 <label class="radio-option"><input type="radio" name="docPolite" value="Good"> Good</label>
@@ -209,7 +221,6 @@
           <div class="dash-grid"><div class="kpi-card"><div class="kpi-val" id="kpi-total">0</div><div class="kpi-lbl">Feedback</div></div><div class="kpi-card"><div class="kpi-val" id="kpi-csi">0%</div><div class="kpi-lbl">Satisfaction</div></div></div>
           <div class="chart-container"><div class="chart-title" id="trend-title">Rating Trend</div><canvas id="chartTrend"></canvas></div>
           <div class="chart-container"><div class="chart-title">Operational Metrics (Yes vs No)</div><canvas id="chartOps"></canvas></div>
-          <!-- CHANGED TITLE -->
           <div class="chart-container"><div class="chart-title">Staff & Doctor Ratings</div><canvas id="chartEmp"></canvas></div>
           <div class="chart-container"><div class="chart-title">Marketing Source</div><canvas id="chartSource"></canvas></div>
         </div>
@@ -245,7 +256,7 @@
         <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
         
         <div class="form-group">
-          <label>Departments (Select multiple)</label>
+          <label>Departments</label>
           <div class="dept-container" id="dept-list-container">
             <div class="dept-item"><input type="checkbox" value="Cardiology"> Cardiology</div>
             <div class="dept-item"><input type="checkbox" value="Dermatology"> Dermatology</div>
@@ -272,6 +283,28 @@
           </div>
         </div>
 
+        <!-- NEW: Employee Multi-Select -->
+        <div class="form-group">
+          <label>Employee Behaviour</label>
+          <div class="dept-container" id="emp-list-container">
+            <div class="dept-item"><input type="checkbox" value="Excellent"> Excellent</div>
+            <div class="dept-item"><input type="checkbox" value="Good"> Good</div>
+            <div class="dept-item"><input type="checkbox" value="Average"> Average</div>
+            <div class="dept-item"><input type="checkbox" value="Poor"> Poor</div>
+          </div>
+        </div>
+
+        <!-- NEW: Doctor Multi-Select -->
+        <div class="form-group">
+          <label>Doctor Consultation</label>
+          <div class="dept-container" id="doc-list-container">
+            <div class="dept-item"><input type="checkbox" value="Excellent"> Excellent</div>
+            <div class="dept-item"><input type="checkbox" value="Good"> Good</div>
+            <div class="dept-item"><input type="checkbox" value="Average"> Average</div>
+            <div class="dept-item"><input type="checkbox" value="Poor"> Poor</div>
+          </div>
+        </div>
+
         <div class="form-group">
           <label>Rating Range (0 - 5)</label>
           <div class="range-row">
@@ -281,9 +314,6 @@
           </div>
         </div>
 
-        <div class="form-group"><label>Employee Behaviour</label><select id="filter-emp"><option value="All">All</option><option>Excellent</option><option>Good</option><option>Average</option><option>Poor</option></select></div>
-        <!-- CHANGED Filter Options for Doctor -->
-        <div class="form-group"><label>Doctor Consultation</label><select id="filter-doc"><option value="All">All</option><option>Excellent</option><option>Good</option><option>Average</option><option>Poor</option></select></div>
         <div class="form-group"><label>Booking Smooth</label><select id="filter-book"><option value="All">All</option><option>Yes</option><option>No</option></select></div>
         <div class="form-group"><label>Clinic Clean</label><select id="filter-clean"><option value="All">All</option><option>Yes</option><option>No</option></select></div>
         <div class="form-group"><label>Source</label><select id="filter-source"><option value="All">All</option><option>Reference</option><option>Facebook</option><option>Youtube</option><option>Website</option></select></div>
@@ -310,6 +340,7 @@
     <script>
       // ================= CONFIGURATION =================
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygybhNtcr494gmONIONCYcx9f1og2uOoH29VJI2lIJUCKsYUblIws2O9MPNtmabPaV/exec"; 
+      const GOOGLE_REVIEW_LINK = "https://g.page/r/CUexQ0smZF95EAE/review";
 
       // ================= PWA & SYNC LOGIC =================
       let newWorker;
@@ -320,7 +351,6 @@
               newWorker = reg.installing;
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New version found
                   document.getElementById('update-notification').style.display = 'flex';
                 }
               });
@@ -331,9 +361,7 @@
       }
       
       document.getElementById('update-reload').addEventListener('click', () => {
-        if(newWorker) {
-          newWorker.postMessage({ type: 'SKIP_WAITING' });
-        }
+        if(newWorker) newWorker.postMessage({ type: 'SKIP_WAITING' });
       });
       
       let refreshing;
@@ -359,7 +387,6 @@
       }
 
       // ================= FORM LOGIC =================
-      // FIXED DATE LOGIC
       const now = new Date();
       const day = ("0" + now.getDate()).slice(-2);
       const month = ("0" + (now.getMonth() + 1)).slice(-2);
@@ -372,7 +399,6 @@
       starInputs.forEach(input => { input.addEventListener('change', function() { const val = parseFloat(this.value); ratingVal.innerText = val.toFixed(1); updateStars(val); }); });
       function updateStars(val) { starIcons.forEach((icon, index) => { const num = index + 1; icon.style.fill = 'var(--gray-star)'; icon.innerHTML = '<use href="#icon-star"></use>'; if (val >= num) icon.style.fill = 'var(--gold)'; else if (val >= num - 0.5) { icon.style.fill = 'var(--gold)'; icon.innerHTML = '<use href="#icon-star-half"></use>'; } }); }
       
-      // UPDATED LOGIC: Both Staff and Doctor trigger comments on Average/Poor
       function setupLogic(name, divId, val, isBeh) { 
         document.getElementsByName(name).forEach(el => { 
           el.addEventListener('change', () => { 
@@ -385,26 +411,46 @@
         }); 
       }
       setupLogic('empBehaviour','followBehaviour','',true); 
-      setupLogic('docPolite','followDoc','',true); // Changed to 'true' (Behav mode: Average/Poor)
+      setupLogic('docPolite','followDoc','',true); 
       setupLogic('bookingSmooth','followBooking','No'); 
       setupLogic('clinicClean','followClean','No');
       
       const form = document.getElementById('feedbackForm');
       form.addEventListener('submit', e => { 
         e.preventDefault(); 
-        
-        // PHONE VALIDATION
         const phone = document.getElementById('phoneInput').value;
         if(phone.length !== 10) { alert("Please enter a valid 10-digit phone number."); return; }
-
         setLoading(true); 
         const fd = new FormData(form); let obj = {}; fd.forEach((v,k) => { obj[k] = obj[k] ? obj[k] + ", " + v : v; }); 
         if(navigator.onLine) { sendData(obj); } else { saveOffline(obj); } 
       });
 
-      function sendData(data) { fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) }).then(res => res.json()).then(resData => { if(resData.result === 'success') triggerSuccessAnimation("Feedback Saved"); else { alert("Error: " + resData.error); setLoading(false); } }).catch(err => { saveOffline(data); }); }
-      function saveOffline(data) { let q = JSON.parse(localStorage.getItem('clinicDB') || "[]"); data._savedAt = new Date(); q.push(data); localStorage.setItem('clinicDB', JSON.stringify(q)); triggerSuccessAnimation("Saved to Device (Offline)"); setTimeout(checkSync, 2000); }
+      function sendData(data) { fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) }).then(res => res.json()).then(resData => { if(resData.result === 'success') finishSubmission(data); else { alert("Error: " + resData.error); setLoading(false); } }).catch(err => { saveOffline(data); }); }
+      function saveOffline(data) { let q = JSON.parse(localStorage.getItem('clinicDB') || "[]"); data._savedAt = new Date(); q.push(data); localStorage.setItem('clinicDB', JSON.stringify(q)); finishSubmission(data, true); setTimeout(checkSync, 2000); }
       function setLoading(isLoading) { const btn = document.getElementById('submitBtn'); const txt = document.getElementById('btnText'); const ldr = document.getElementById('btnLoader'); if(isLoading) { btn.disabled = true; txt.innerText = "SAVING..."; ldr.style.display = "block"; } else { btn.disabled = false; txt.innerText = "SUBMIT FEEDBACK"; ldr.style.display = "none"; } }
+      
+      function finishSubmission(data, isOffline) {
+        // CHECK FOR QR CODE
+        const rating = parseFloat(data.rating);
+        if(rating >= 4) {
+           showQr();
+           return; // Stop here, wait for manual close
+        }
+        triggerSuccessAnimation(isOffline ? "Saved to Device (Offline)" : "Feedback Saved");
+      }
+
+      function showQr() {
+         document.getElementById('main-view').style.display = 'none';
+         document.getElementById('qr-modal').style.display = 'flex';
+         // Generate QR
+         new QRious({ element: document.getElementById('qr-canvas'), value: GOOGLE_REVIEW_LINK, size: 200 });
+      }
+
+      function closeQr() {
+         document.getElementById('qr-modal').style.display = 'none';
+         triggerSuccessAnimation("Feedback Saved");
+      }
+
       function triggerSuccessAnimation(msg) { document.querySelector('.success-title').innerText = msg; document.getElementById('main-view').style.display = 'none'; document.getElementById('success-view').style.display = 'flex'; setTimeout(() => { document.getElementById('success-view').style.opacity = '1'; }, 10); window.scrollTo(0,0); setTimeout(() => { resetAll(); }, 2500); }
       function resetAll() { document.getElementById('success-view').style.opacity = '0'; setTimeout(() => { document.getElementById('success-view').style.display = 'none'; document.getElementById('main-view').style.display = 'block'; form.reset(); document.getElementById('dateField').value = today; updateStars(0); ratingVal.innerText = "0.0"; document.querySelectorAll('.follow-up').forEach(x => x.classList.remove('show')); setLoading(false); setTimeout(() => { document.getElementById('caseInput').focus(); }, 100); }, 400); }
 
@@ -417,46 +463,18 @@
         if(IS_ADMIN_SESSION) { showDashboard(); } 
         else { document.getElementById('login-modal').style.display = 'flex'; document.getElementById('adminPass').focus(); }
       }
-
-      function closeAdmin() {
-        document.getElementById('login-modal').style.display = 'none';
-        document.getElementById('admin-app').style.display = 'none';
-        document.getElementById('patient-view').style.display = 'block';
-        window.scrollTo(0,0);
-      }
-
+      function closeAdmin() { document.getElementById('login-modal').style.display = 'none'; document.getElementById('admin-app').style.display = 'none'; document.getElementById('patient-view').style.display = 'block'; window.scrollTo(0,0); }
       document.getElementById('adminPass').addEventListener('keyup', function(e) { if (e.key === 'Enter') attemptLogin(); });
-
-      function attemptLogin() {
-        const p = document.getElementById('adminPass').value;
-        const btn = document.getElementById('btnLogin');
-        const msg = document.getElementById('login-msg');
-        btn.innerText = "Checking..."; msg.innerText = "";
-        fetch(SCRIPT_URL + `?action=login&pass=${p}`).then(r => r.json()).then(d => {
-          if(d.result === 'success') { IS_ADMIN_SESSION = true; document.getElementById('login-modal').style.display = 'none'; document.getElementById('adminPass').value = ""; showDashboard(); } 
-          else { msg.innerText = "Incorrect Password"; }
-          btn.innerText = "ENTER";
-        }).catch(e => { msg.innerText = "Network Error"; btn.innerText = "ENTER"; });
-      }
-
+      function attemptLogin() { const p = document.getElementById('adminPass').value; const btn = document.getElementById('btnLogin'); const msg = document.getElementById('login-msg'); btn.innerText = "Checking..."; msg.innerText = ""; fetch(SCRIPT_URL + `?action=login&pass=${p}`).then(r => r.json()).then(d => { if(d.result === 'success') { IS_ADMIN_SESSION = true; document.getElementById('login-modal').style.display = 'none'; document.getElementById('adminPass').value = ""; showDashboard(); } else { msg.innerText = "Incorrect Password"; } btn.innerText = "ENTER"; }).catch(e => { msg.innerText = "Network Error"; btn.innerText = "ENTER"; }); }
       function logout() { IS_ADMIN_SESSION = false; closeAdmin(); }
-
-      function showDashboard() {
-        document.getElementById('patient-view').style.display = 'none';
-        document.getElementById('admin-app').style.display = 'block';
-        if(RAW_DATA.length === 0) loadData(); 
-      }
+      function showDashboard() { document.getElementById('patient-view').style.display = 'none'; document.getElementById('admin-app').style.display = 'block'; if(RAW_DATA.length === 0) loadData(); }
 
       function loadData(startStr, endStr) {
         document.getElementById('dashboard-loader').style.display = 'flex';
         let url = SCRIPT_URL + `?action=getData`;
         if(startStr && endStr) { url += `&start=${startStr}&end=${endStr}`; document.getElementById('date-range-lbl').innerText = `${startStr} to ${endStr}`; } 
         else { document.getElementById('date-range-lbl').innerText = "Last 30 Days"; const past = new Date(); past.setDate(now.getDate()-30); document.getElementById('filter-end').value = today; document.getElementById('filter-start').valueAsDate = past; }
-
-        fetch(url).then(r=>r.json()).then(d => {
-          if(d.result === 'success') { RAW_DATA = d.data; processData(RAW_DATA); } else { alert("Error loading data"); }
-          document.getElementById('dashboard-loader').style.display = 'none';
-        });
+        fetch(url).then(r=>r.json()).then(d => { if(d.result === 'success') { RAW_DATA = d.data; processData(RAW_DATA); } else { alert("Error loading data"); } document.getElementById('dashboard-loader').style.display = 'none'; });
       }
 
       function processData(data) {
@@ -477,14 +495,11 @@
           else if(r['Timestamp']) dateTxt = new Date(r['Timestamp']).toLocaleDateString();
           const card = document.createElement('div');
           card.className = "record-card";
-          
-          // BUILD COMMENTS
           let commentsHtml = "";
           if(r['Emp Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Support Staff</span>${r['Emp Comments']}</div>`;
           if(r['Doctor Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Doctor</span>${r['Doctor Comments']}</div>`;
           if(r['Booking Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Booking</span>${r['Booking Comments']}</div>`;
           if(r['Cleanliness Comments']) commentsHtml += `<div class="rc-comment-box"><span class="rc-comment-lbl">Cleanliness</span>${r['Cleanliness Comments']}</div>`;
-
           card.innerHTML = `
             <div class="rc-header"><span class="rc-id">${r['Case Number']}</span><span class="rc-date">${dateTxt}</span></div>
             <div class="rc-row"><span class="rc-name">${r['Patient Name']}</span><span class="rc-rating">${r['Rating']} ★</span></div>
@@ -510,14 +525,12 @@
       function closeFilter() { document.getElementById('filter-drawer').classList.remove('open'); setTimeout(()=>document.getElementById('drawer-overlay').style.display = 'none', 300); }
       
       function resetFilters() {
-         document.getElementById('filter-emp').value = "All";
-         document.getElementById('filter-doc').value = "All";
+         document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
          document.getElementById('filter-book').value = "All";
          document.getElementById('filter-clean').value = "All";
          document.getElementById('filter-source').value = "All";
          document.getElementById('filter-rate-min').value = "0";
          document.getElementById('filter-rate-max').value = "5";
-         document.querySelectorAll('#dept-list-container input[type="checkbox"]').forEach(cb => cb.checked = false);
          const past = new Date(); past.setDate(now.getDate()-30);
          document.getElementById('filter-end').value = today;
          document.getElementById('filter-start').valueAsDate = past;
@@ -540,10 +553,12 @@
       }
 
       function runLocalFilters() {
-        const checkboxes = document.querySelectorAll('#dept-list-container input[type="checkbox"]:checked');
-        const selectedDepts = Array.from(checkboxes).map(cb => cb.value);
-        const f_emp = document.getElementById('filter-emp').value;
-        const f_doc = document.getElementById('filter-doc').value;
+        // GET CHECKBOX VALUES
+        const getChecked = (id) => Array.from(document.querySelectorAll(`#${id} input:checked`)).map(cb => cb.value);
+        const depts = getChecked('dept-list-container');
+        const emps = getChecked('emp-list-container');
+        const docs = getChecked('doc-list-container');
+
         const f_book = document.getElementById('filter-book').value;
         const f_clean = document.getElementById('filter-clean').value;
         const f_source = document.getElementById('filter-source').value;
@@ -551,15 +566,14 @@
         const f_max = parseFloat(document.getElementById('filter-rate-max').value);
 
         let local = RAW_DATA.filter(r => {
-          if(selectedDepts.length > 0 && !selectedDepts.includes(r['Department'])) return false;
-          if(f_emp !== 'All' && r['Emp Behaviour'] !== f_emp) return false;
+          if(depts.length > 0 && !depts.includes(r['Department'])) return false;
+          if(emps.length > 0 && !emps.includes(r['Emp Behaviour'])) return false;
           
-          // DOCTOR FILTER: Handle old Yes/No
-          if(f_doc !== 'All') {
+          if(docs.length > 0) {
             let val = r['Doctor Polite'];
-            if(val === 'Yes') val = 'Good'; // Map old data
-            if(val === 'No') val = 'Poor'; // Map old data
-            if(val !== f_doc) return false;
+            if(val === 'Yes') val = 'Good'; 
+            if(val === 'No') val = 'Poor'; 
+            if(!docs.includes(val)) return false;
           }
 
           if(f_book !== 'All' && r['Booking Smooth'] !== f_book) return false;
@@ -572,62 +586,27 @@
         processData(local); 
       }
 
-      function changePassword() {
-        const o = document.getElementById('oldPass').value;
-        const n = document.getElementById('newPass').value;
-        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({action:'changePassword', oldPass:o, newPass:n}) })
-        .then(r=>r.json()).then(d=>{ if(d.result==='success') { alert("Password Changed"); document.getElementById('oldPass').value=""; document.getElementById('newPass').value=""; } else alert("Error: " + d.error); });
-      }
-
-      function switchTab(t) {
-        document.querySelectorAll('.tab-content').forEach(d => d.classList.add('hidden'));
-        document.querySelectorAll('.nav-tab').forEach(d => d.classList.remove('active'));
-        document.getElementById('tab-'+t).classList.remove('hidden');
-        event.target.classList.add('active');
-      }
+      function changePassword() { const o = document.getElementById('oldPass').value; const n = document.getElementById('newPass').value; fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({action:'changePassword', oldPass:o, newPass:n}) }).then(r=>r.json()).then(d=>{ if(d.result==='success') { alert("Password Changed"); document.getElementById('oldPass').value=""; document.getElementById('newPass').value=""; } else alert("Error: " + d.error); }); }
+      function switchTab(t) { document.querySelectorAll('.tab-content').forEach(d => d.classList.add('hidden')); document.querySelectorAll('.nav-tab').forEach(d => d.classList.remove('active')); document.getElementById('tab-'+t).classList.remove('hidden'); event.target.classList.add('active'); }
 
       function renderCharts(data) {
         ['chartTrend','chartOps','chartEmp','chartSource'].forEach(id => { if(chartInstances[id]) chartInstances[id].destroy(); });
         const dates = {};
-        
-        data.forEach(r => { 
-          let d = 'Unknown';
-          if(r['Visit Date']) d = new Date(r['Visit Date']).toLocaleDateString('en-CA'); 
-          if(!dates[d]) dates[d] = []; dates[d].push(parseFloat(r['Rating'])||0); 
-        });
-
+        data.forEach(r => { let d = 'Unknown'; if(r['Visit Date']) d = new Date(r['Visit Date']).toLocaleDateString('en-CA'); if(!dates[d]) dates[d] = []; dates[d].push(parseFloat(r['Rating'])||0); });
         const lbls = Object.keys(dates).sort();
         const avgs = lbls.map(d => dates[d].reduce((a,b)=>a+b,0)/dates[d].length);
         chartInstances['chartTrend'] = new Chart(document.getElementById('chartTrend'), { type: 'line', data: { labels: lbls, datasets: [{ label: 'Avg Rating', data: avgs, borderColor: '#008080', tension: 0.3 }] } });
         const srcs = {}; data.forEach(r => { let s = r['Source'] || 'Unknown'; s.split(',').forEach(x => { x=x.trim(); srcs[x] = (srcs[x]||0)+1; }); });
         chartInstances['chartSource'] = new Chart(document.getElementById('chartSource'), { type: 'bar', data: { labels: Object.keys(srcs), datasets: [{ label: 'Count', data: Object.values(srcs), backgroundColor: '#FFD700' }] } });
         
-        // NEW CHART LOGIC: Staff vs Doctor
         const staff = { 'Excellent':0, 'Good':0, 'Average':0, 'Poor':0 };
         const doc = { 'Excellent':0, 'Good':0, 'Average':0, 'Poor':0 };
-        
         data.forEach(r => { 
           if(staff[r['Emp Behaviour']] !== undefined) staff[r['Emp Behaviour']]++; 
-          
-          let dVal = r['Doctor Polite'];
-          // MAPPING OLD DATA
-          if(dVal === 'Yes') dVal = 'Good'; 
-          if(dVal === 'No') dVal = 'Poor';
+          let dVal = r['Doctor Polite']; if(dVal === 'Yes') dVal = 'Good'; if(dVal === 'No') dVal = 'Poor';
           if(doc[dVal] !== undefined) doc[dVal]++;
         });
-
-        // CHANGED TO BAR CHART (Grouped)
-        chartInstances['chartEmp'] = new Chart(document.getElementById('chartEmp'), { 
-            type: 'bar', 
-            data: { 
-                labels: ['Excellent', 'Good', 'Average', 'Poor'], 
-                datasets: [
-                    { label: 'Support Staff', data: [staff.Excellent, staff.Good, staff.Average, staff.Poor], backgroundColor: '#28a745' },
-                    { label: 'Doctor', data: [doc.Excellent, doc.Good, doc.Average, doc.Poor], backgroundColor: '#007bff' }
-                ] 
-            } 
-        });
-
+        chartInstances['chartEmp'] = new Chart(document.getElementById('chartEmp'), { type: 'bar', data: { labels: ['Excellent', 'Good', 'Average', 'Poor'], datasets: [ { label: 'Support Staff', data: [staff.Excellent, staff.Good, staff.Average, staff.Poor], backgroundColor: '#28a745' }, { label: 'Doctor', data: [doc.Excellent, doc.Good, doc.Average, doc.Poor], backgroundColor: '#007bff' } ] } });
         const ops = { 'Booking Smooth': {Yes:0, No:0}, 'Clinic Clean': {Yes:0, No:0} };
         data.forEach(r => { ['Booking Smooth','Clinic Clean'].forEach(k => { let val = r[k] === 'Yes' ? 'Yes' : 'No'; ops[k][val]++; }); });
         chartInstances['chartOps'] = new Chart(document.getElementById('chartOps'), { type: 'bar', data: { labels: ['Booking', 'Cleanliness'], datasets: [ { label: 'Yes', data: [ops['Booking Smooth'].Yes, ops['Clinic Clean'].Yes], backgroundColor: '#28a745' }, { label: 'No', data: [ops['Booking Smooth'].No, ops['Clinic Clean'].No], backgroundColor: '#dc3545' } ] }, options: { scales: { x: { stacked: true }, y: { stacked: true } } } });
